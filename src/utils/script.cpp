@@ -9,12 +9,12 @@ namespace olsh::Utils {
 ScriptInterpreter::ScriptInterpreter(olsh::Shell* shellInstance) : shell(shellInstance) {}
 
 bool ScriptInterpreter::isScriptFile(const std::string& filename) {
-    return filename.size() >= 4 && filename.substr(filename.size() - 4) == ".olsh";
+    return filename.size() >= 5 && filename.substr(filename.size() - 5) == ".olsh";
 }
 
 int ScriptInterpreter::executeScript(const std::string& filename) {
     if (!isScriptFile(filename)) {
-        std::cerr << "Error: Not a valid .osh script file: " << filename << std::endl;
+        std::cerr << "Error: Not a valid .olsh script file: " << filename << std::endl;
         return 1;
     }
 
