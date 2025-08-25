@@ -1,0 +1,36 @@
+# CLion project files
+.idea/
+cmake-build-*/
+
+# CMake generated files
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+*.cbp
+*.user
+*.user.*.xml
+
+# Executables
+*.exe
+*.out
+*.app
+*.o
+*.obj
+*.dll
+*.lib
+*.a
+*.pdb
+
+# Backup and temp files
+*~
+*.swp
+*.DS_Store
+*.log
+
+# Mac/Linux hidden files
+*.so
+*.dylib
+
+# Misc
+*.VSCode
