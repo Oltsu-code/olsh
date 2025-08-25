@@ -21,7 +21,14 @@ add_executable(olshell
         src/builtins/echo.cpp
         src/builtins/pwd.cpp
         src/builtins/help.cpp
+        src/builtins/cat.cpp
+        src/builtins/clear.cpp
+        src/builtins/history.cpp
+        src/builtins/joke.cpp
+        src/builtins/alias.cpp
         src/utils/fs.cpp
         src/utils/string.cpp
         src/utils/windows_compat.cpp
+        src/utils/autocomplete.cpp
+        src/utils/script.cpp
 )

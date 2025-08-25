@@ -1,12 +1,16 @@
 #ifndef RM_H
 #define RM_H
 
+#include <string>
+#include <vector>
+
 namespace olsh::Builtins {
 
-class rm {
-
+class Rm {
+public:
+    int execute(const std::vector<std::string>& args);
 };
 
-} // olsh
+}
 
 #endif //RM_H

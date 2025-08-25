@@ -1,12 +1,16 @@
 #ifndef HELP_H
 #define HELP_H
 
+#include <string>
+#include <vector>
+
 namespace olsh::Builtins {
 
-class help {
-
+class Help {
+public:
+    int execute(const std::vector<std::string>& args);
 };
 
-} // olsh
+}
 
 #endif //HELP_H

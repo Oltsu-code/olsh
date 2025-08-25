@@ -1,16 +1,16 @@
-#ifndef ECHO_H
-#define ECHO_H
+#ifndef CAT_H
+#define CAT_H
 
 #include <string>
 #include <vector>
 
 namespace olsh::Builtins {
 
-class Echo {
+class Cat {
 public:
     int execute(const std::vector<std::string>& args);
 };
 
 }
 
-#endif //ECHO_H
+#endif //CAT_H

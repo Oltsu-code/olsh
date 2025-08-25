@@ -1,16 +1,16 @@
-#ifndef ECHO_H
-#define ECHO_H
+#ifndef JOKE_H
+#define JOKE_H
 
 #include <string>
 #include <vector>
 
 namespace olsh::Builtins {
 
-class Echo {
+class Joke {
 public:
     int execute(const std::vector<std::string>& args);
 };
 
 }
 
-#endif //ECHO_H
+#endif //JOKE_H

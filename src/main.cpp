@@ -1,9 +1,8 @@
 #include <iostream>
+#include "../include/shell.h"
 
 int main() {
-    for (int i = 1; i <= 5; i++) {
-        std::cout << "i = " << i << std::endl;
-    }
-
+    olsh::Shell shell;
+    shell.run();
     return 0;
 }

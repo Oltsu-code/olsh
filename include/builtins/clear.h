@@ -1,16 +1,16 @@
-#ifndef ECHO_H
-#define ECHO_H
+#ifndef CLEAR_H
+#define CLEAR_H
 
 #include <string>
 #include <vector>
 
 namespace olsh::Builtins {
 
-class Echo {
+class Clear {
 public:
     int execute(const std::vector<std::string>& args);
 };
 
 }
 
-#endif //ECHO_H
+#endif //CLEAR_H
