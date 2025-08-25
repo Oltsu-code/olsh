@@ -56,6 +56,8 @@ void Alias::loadAliases() {
             }
 
             aliases[name] = value;
+
+            std::cout << "alias loaded" << std::endl;
         }
     }
 }
@@ -155,6 +157,7 @@ int Alias::execute(const std::vector<std::string>& args) {
 }
 
 std::string Alias::expandAlias(const std::string& command) {
+    loadAliases(); // without this new aliases will not be found until restart
     auto it = aliases.find(command);
     if (it != aliases.end()) {
         return it->second;
