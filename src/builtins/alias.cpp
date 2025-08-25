@@ -56,8 +56,6 @@ void Alias::loadAliases() {
             }
 
             aliases[name] = value;
-
-            std::cout << "alias loaded" << std::endl;
         }
     }
 }
