@@ -17,6 +17,11 @@ int Help::execute(const std::vector<std::string>& args) {
     std::cout << "                       -n: no trailing newline\n";
     std::cout << "  rm [-r] <files>    - Remove files/directories\n";
     std::cout << "                       -r: recursive removal\n";
+    std::cout << "  cat <files>        - Concatenate and display file contents\n";
+    std::cout << "  clear              - Clear the terminal screen\n";
+    std::cout << "  history            - Show command history\n";
+    std::cout << "  joke               - Tell a random programming joke\n";
+    std::cout << "  alias [name[=value] ...] - Define or display aliases\n";
     std::cout << "  help               - Show this help message\n";
     std::cout << "  exit               - Exit the shell\n\n";
 
