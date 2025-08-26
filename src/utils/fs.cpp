@@ -1,4 +1,5 @@
 #include "../../include/utils/fs.h"
+#include <utils/colors.h>
 #include <filesystem>
 #include <iostream>
 
@@ -35,7 +36,7 @@ std::vector<std::string> Fs::listDirectory(const std::string& path) {
             files.push_back(entry.path().filename().string());
         }
     } catch (const std::filesystem::filesystem_error& e) {
-        std::cerr << "Error listing directory: " << e.what() << std::endl;
+        std::cerr << RED << "Error listing directory: " << e.what() << RESET << std::endl;
     }
     return files;
 }
