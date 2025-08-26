@@ -1,4 +1,5 @@
 #include "../../include/builtins/history.h"
+#include <utils/colors.h>
 #include <iostream>
 #include <fstream>
 #include <algorithm>
@@ -38,7 +39,7 @@ History::History() : maxHistorySize(1000) {
 void History::loadHistory() {
     std::ifstream file(historyFile);
     if (!file.is_open()) {
-        return; // No history file yet
+        return;
     }
 
     std::string line;
@@ -96,7 +97,7 @@ int History::execute(const std::vector<std::string>& args) {
         // clear history (yk when to use this)
         historyList.clear();
         saveHistory();
-        std::cout << "History cleared." << std::endl;
+        std::cout << GREEN << "History cleared." << RESET << std::endl;
         return 0;
     }
 
@@ -109,11 +110,11 @@ int History::execute(const std::vector<std::string>& args) {
                 std::cout << std::setw(5) << (i + 1) << "  " << historyList[i] << std::endl;
             }
         } else {
-            std::cerr << "history: invalid number: " << args[0] << std::endl;
+            std::cerr << RED << "history: invalid number: " << args[0] << RESET << std::endl;
             return 1;
         }
     } catch (const std::exception&) {
-        std::cerr << "history: invalid argument: " << args[0] << std::endl;
+        std::cerr << RED << "history: invalid argument: " << args[0] << RESET << std::endl;
         return 1;
     }
 

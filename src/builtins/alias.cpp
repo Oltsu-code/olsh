@@ -1,11 +1,11 @@
 #include "../../include/builtins/alias.h"
-
+#include <utils/colors.h>
 #include <filesystem>
-
 #include "../../include/utils/fs.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
+
 
 #ifdef _WIN32
 #include <windows.h>
@@ -69,7 +69,7 @@ void Alias::saveAliases() {
 
     std::ofstream file(aliasFile);
     if (!file.is_open()) {
-        std::cerr << "Warning: Could not save aliases to " << aliasFile << std::endl;
+        std::cerr << YELLOW << "Warning: Could not save aliases to " << aliasFile << RESET << std::endl;
         return;
     }
 
@@ -83,10 +83,10 @@ int Alias::execute(const std::vector<std::string>& args) {
     if (args.empty()) {
         // list all
         if (aliases.empty()) {
-            std::cout << "No aliases defined.\n";
+            std::cout << RED << "alias: no aliases defined." << RESET << std::endl;
         } else {
             for (const auto& pair : aliases) {
-                std::cout << "alias " << pair.first << "='" << pair.second << "'\n";
+                std::cout << GREEN << "alias " << pair.first << "='" << pair.second << "'\n" << RESET;
             }
         }
         return 0;
@@ -144,12 +144,12 @@ int Alias::execute(const std::vector<std::string>& args) {
     }
 
     if (name.empty()) {
-        std::cerr << "alias: invalid alias name\n";
+        std::cerr << RED << "alias: invalid alias name\n" << RESET;
         return 1;
     }
 
     if (value.empty()) {
-        std::cerr << "alias: no value specified for alias '" << name << "'\n";
+        std::cerr << RED << "alias: no value specified for alias '" << name << "'\n" << RESET;
         return 1;
     }
 

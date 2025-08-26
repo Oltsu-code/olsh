@@ -7,7 +7,7 @@ int Echo::execute(const std::vector<std::string>& args) {
     bool newline = true;
     size_t start = 0;
 
-    // Check for -n option
+    // parse flag
     if (!args.empty() && args[0] == "-n") {
         newline = false;
         start = 1;
