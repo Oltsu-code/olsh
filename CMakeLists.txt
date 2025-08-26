@@ -20,11 +20,9 @@ add_executable(olshell
         src/builtins/rm.cpp
         src/builtins/echo.cpp
         src/builtins/pwd.cpp
-        src/builtins/help.cpp
         src/builtins/cat.cpp
         src/builtins/clear.cpp
         src/builtins/history.cpp
-        src/builtins/joke.cpp
         src/builtins/alias.cpp
         src/utils/fs.cpp
         src/utils/string.cpp

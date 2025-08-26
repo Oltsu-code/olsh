@@ -1,5 +1,6 @@
 #include "../../include/executor/executor.h"
 #include "../../include/executor/process.h"
+#include <utils/colors.h>
 #include <iostream>
 
 namespace olsh {
@@ -8,7 +9,7 @@ Executor::Executor() {}
 
 int Executor::execute(std::unique_ptr<Parser::ASTNode> node) {
     if (!node) {
-        std::cerr << "Error: Invalid command\n";
+        std::cerr << RED << "Error: Invalid command\n" << RESET;
         return 1;
     }
 
@@ -21,7 +22,7 @@ int Executor::execute(std::unique_ptr<Parser::ASTNode> node) {
         case Parser::CommandType::REDIRECTION:
             return executeRedirection(*static_cast<Parser::Redirection*>(node.get()));
         default:
-            std::cerr << "Error: Unknown command type\n";
+            std::cerr << RED << "Error: Unknown command type\n" << RESET;
             return 1;
     }
 }
@@ -39,16 +40,12 @@ int Executor::executeCommand(const Parser::Command& cmd) {
             return echoCommand.execute(cmd.args);
         } else if (cmd.name == "rm") {
             return rmCommand.execute(cmd.args);
-        } else if (cmd.name == "help") {
-            return helpCommand.execute(cmd.args);
         } else if (cmd.name == "cat") {
             return catCommand.execute(cmd.args);
         } else if (cmd.name == "clear") {
             return clearCommand.execute(cmd.args);
         } else if (cmd.name == "history") {
             return historyCommand.execute(cmd.args);
-        } else if (cmd.name == "joke") {
-            return jokeCommand.execute(cmd.args);
         } else if (cmd.name == "alias") {
             return aliasCommand.execute(cmd.args);
         }

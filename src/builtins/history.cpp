@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
+#include <filesystem>
 #include <iomanip>
 #include <vector>
 
@@ -18,7 +19,7 @@ History::History() : maxHistorySize(1000) {
 #ifdef _WIN32
     char* homeDir = getenv("USERPROFILE");
     if (homeDir != nullptr) {
-        historyFile = std::string(homeDir) + "\\.olsh_history";
+        historyFile = std::string(homeDir) + "\\.olshell\\history";
     } else {
         historyFile = ".olsh_history";
     }
@@ -49,6 +50,9 @@ void History::loadHistory() {
 }
 
 void History::saveHistory() {
+    std::filesystem::path path(historyFile);
+    std::filesystem::create_directory(path.parent_path()); // generate the dir if it doesnt exist
+
     std::ofstream file(historyFile);
     if (!file.is_open()) {
         return;

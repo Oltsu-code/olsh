@@ -1,4 +1,5 @@
 #include "../../include/parser/parser.h"
+#include <utils/colors.h>
 #include <iostream>
 
 namespace olsh {
@@ -76,7 +77,7 @@ std::unique_ptr<Parser::ASTNode> CommandParser::parseRedirection(std::unique_ptr
         advance();
 
         if (peek().type != Parser::TokenType::WORD) {
-            std::cerr << "Expected filename after redirection\n";
+            std::cerr << RED << "Expected filename after redirection\n" << RESET;
             return node;
         }
 

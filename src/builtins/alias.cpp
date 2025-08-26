@@ -1,4 +1,7 @@
 #include "../../include/builtins/alias.h"
+
+#include <filesystem>
+
 #include "../../include/utils/fs.h"
 #include <iostream>
 #include <fstream>
@@ -19,7 +22,7 @@ Alias::Alias() {
 #ifdef _WIN32
     char* homeDir = getenv("USERPROFILE");
     if (homeDir != nullptr) {
-        aliasFile = std::string(homeDir) + "\\.olsh_aliases";
+        aliasFile = std::string(homeDir) + "\\.olshell\\aliases";
     } else {
         aliasFile = ".olsh_aliases";
     }
@@ -61,6 +64,9 @@ void Alias::loadAliases() {
 }
 
 void Alias::saveAliases() {
+    std::filesystem::path path(aliasFile);
+    std::filesystem::create_directory(path.parent_path()); // generate the dir if it doesnt exist
+
     std::ofstream file(aliasFile);
     if (!file.is_open()) {
         std::cerr << "Warning: Could not save aliases to " << aliasFile << std::endl;

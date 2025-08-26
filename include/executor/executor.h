@@ -8,11 +8,9 @@
 #include "../builtins/pwd.h"
 #include "../builtins/echo.h"
 #include "../builtins/rm.h"
-#include "../builtins/help.h"
 #include "../builtins/cat.h"
 #include "../builtins/clear.h"
 #include "../builtins/history.h"
-#include "../builtins/joke.h"
 #include "../builtins/alias.h"
 
 namespace olsh {
@@ -25,11 +23,9 @@ private:
     Builtins::Pwd pwdCommand;
     Builtins::Echo echoCommand;
     Builtins::Rm rmCommand;
-    Builtins::Help helpCommand;
     Builtins::Cat catCommand;
     Builtins::Clear clearCommand;
     Builtins::History historyCommand;
-    Builtins::Joke jokeCommand;
     Builtins::Alias aliasCommand;
 
     int executeCommand(const Parser::Command& cmd);

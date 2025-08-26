@@ -1,8 +1,10 @@
 #include "../../include/utils/script.h"
 #include "../../include/shell.h"
+#include <utils/colors.h>
 #include <iostream>
 #include <fstream>
 #include <sstream>
+
 
 namespace olsh::Utils {
 
@@ -14,13 +16,13 @@ bool ScriptInterpreter::isScriptFile(const std::string& filename) {
 
 int ScriptInterpreter::executeScript(const std::string& filename) {
     if (!isScriptFile(filename)) {
-        std::cerr << "Error: Not a valid .olsh script file: " << filename << std::endl;
+        std::cerr << RED << "Error: Not a valid .olsh script file: " << filename << RESET << std::endl;
         return 1;
     }
 
     std::ifstream file(filename);
     if (!file.is_open()) {
-        std::cerr << "Error: Cannot open script file: " << filename << std::endl;
+        std::cerr << RED << "Error: Cannot open script file: " << filename << RESET << std::endl;
         return 1;
     }
 
@@ -55,7 +57,7 @@ int ScriptInterpreter::executeScriptContent(const std::string& content) {
             shell->processCommand(line);
             lastExitCode = 0; // assuming we win cz idk how to capture the exit code
         } catch (const std::exception& e) {
-            std::cerr << "Script error at line " << lineNumber << ": " << e.what() << std::endl;
+            std::cerr << RED << "Script error at line " << lineNumber << ": " << e.what() << RESET << std::endl;
             lastExitCode = 1;
         }
     }

@@ -3,6 +3,8 @@
 #include <filesystem>
 #include <iomanip>
 
+#include "utils/colors.h"
+
 namespace olsh::Builtins {
 
 int Ls::execute(const std::vector<std::string>& args) {
@@ -12,30 +14,39 @@ int Ls::execute(const std::vector<std::string>& args) {
 
     // parse args
     for (const auto& arg : args) {
-        if (arg == "-a" || arg == "--all") {
+        if (arg[0] == '-' && arg.size() > 1) {
+            for (size_t i = 1; i < arg.size(); i++) {
+                switch(arg[i]) {
+                    case 'a': showHidden = true; break;
+                    case 'l': longFormat = true; break;
+                    default:
+                        std::cerr << RED << "Unknown option: -" << arg[i] << RESET << "\n";
+                }
+            }
+        } else if (arg == "--all") {
             showHidden = true;
-        } else if (arg == "-l" || arg == "--long") {
+        } else if (arg == "--long") {
             longFormat = true;
-        } else if (arg[0] != '-') {
-            path = arg;
+        } else {
+            path = arg; // positional argument
         }
     }
+
 
     try {
         if (std::filesystem::is_directory(path)) {
             for (const auto& entry : std::filesystem::directory_iterator(path)) {
                 std::string filename = entry.path().filename().string();
 
-                // Skip hidden files unless -a is specified
+                // skip hidden files
                 if (!showHidden && filename[0] == '.') {
                     continue;
                 }
 
                 if (longFormat) {
-                    // Show detailed information
                     auto size = entry.is_regular_file() ? std::filesystem::file_size(entry) : 0;
                     std::cout << (entry.is_directory() ? "d" : "-");
-                    std::cout << "rwxrwxrwx ";  // Simplified permissions
+                    std::cout << "rwxrwxrwx "; // permissions (not accurate, just a placeholder)
                     std::cout << std::setw(8) << size << " ";
                     std::cout << filename << std::endl;
                 } else {

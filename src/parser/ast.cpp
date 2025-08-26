@@ -8,8 +8,8 @@ Command::Command(const std::string& cmdName, const std::vector<std::string>& arg
 CommandType Command::getType() const {
     // builtins
     if (name == "cd" || name == "ls" || name == "pwd" || name == "echo" ||
-        name == "rm" || name == "help" || name == "cat" || name == "clear" ||
-        name == "history" || name == "joke" || name == "alias") {
+        name == "rm" || name == "cat" || name == "clear" ||
+        name == "history" || name == "alias") {
         return CommandType::BUILTIN;
     }
     return CommandType::EXTERNAL;

@@ -1,6 +1,8 @@
 #include "../../include/executor/process.h"
+#include <utils/colors.h>
 #include <iostream>
 #include <cstdlib>
+
 
 namespace olsh {
 
@@ -11,7 +13,7 @@ namespace olsh {
             int result = std::system(cmdLine.c_str());
             return result;
         } catch (const std::exception& e) {
-            std::cerr << "Error executing command: " << e.what() << std::endl;
+            std::cerr << RED << "Error executing command: " << e.what() << RESET << std::endl;
             return 1;
         }
     }

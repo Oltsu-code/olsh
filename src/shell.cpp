@@ -1,4 +1,5 @@
 #include "../include/shell.h"
+#include <utils/colors.h>
 #include <iostream>
 #include <filesystem>
 #include <conio.h>
@@ -49,8 +50,43 @@ void Shell::run() {
 }
 
 void Shell::displayPrompt() {
-    std::cout << "olsh:" << std::filesystem::current_path().filename().string() << "$ ";
+    std::string user = "user";
+    std::string hostname = "host";
+
+#ifdef _WIN32
+    char username[256];
+    DWORD username_len = 256;
+    if (GetUserNameA(username, &username_len)) {
+        user = username;
+    }
+
+    char computerName[256];
+    DWORD size = 256;
+    if (GetComputerNameA(computerName, &size)) {
+        hostname = computerName;
+    }
+#else
+    const char* login = getlogin();
+    if (login) user = login;
+
+    char hostbuf[256];
+    if (gethostname(hostbuf, sizeof(hostbuf)) == 0) {
+        hostname = hostbuf;
+    }
+#endif
+
+    std::string cwd = std::filesystem::current_path().string();
+
+    std::cout
+        << BOLD_BLUE  << "┌─("
+        << RED        << user << "@" << hostname
+        << BOLD_BLUE  << ")-["
+        << GREEN      << cwd
+        << BOLD_BLUE  << "]\n"
+        << BOLD_BLUE  << "└─$ "
+        << RESET;
 }
+
 
 std::string Shell::readInput() {
     std::string input;
@@ -127,6 +163,7 @@ void Shell::processCommand(const std::string& input) {
 
 void Shell::exit() {
     std::cout << "why quit :(\n";
+    std::cout << RESET;
     running = false;
 }
 
