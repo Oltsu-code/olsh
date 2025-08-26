@@ -13,7 +13,7 @@ int Cd::execute(const std::vector<std::string>& args) {
         // no args means go home
         path = olsh::Utils::Fs::getHomeDirectory();
     } else {
-        path = args[0];
+        path = olsh::Utils::Fs::expandPath(args[0]);
     }
 
     try {

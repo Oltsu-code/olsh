@@ -1,4 +1,5 @@
 #include "../include/shell.h"
+#include "../include/utils/fs.h"
 #include <utils/colors.h>
 #include <iostream>
 #include <filesystem>
@@ -75,7 +76,7 @@ void Shell::displayPrompt() {
     }
 #endif
 
-    std::string cwd = std::filesystem::current_path().string();
+    std::string cwd = Utils::Fs::normalizePath(std::filesystem::current_path().string());
 
     std::cout
         << BOLD_BLUE  << "┌─("
