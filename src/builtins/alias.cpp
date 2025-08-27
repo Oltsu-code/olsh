@@ -81,62 +81,81 @@ void Alias::saveAliases() {
 
 int Alias::execute(const std::vector<std::string>& args) {
 
-    
-    // parse flags TODO: make this better
-    if (!arg.empty() && arg[0] == '-' && arg.size() > 1) {
-        for (size_t i = 1; i < arg.size(); i++) {
-            switch(arg[i]) {
-                case 'r': 
-                    removeAlias(arg[i++]);
-                default:
-                    std::cerr << RED << "alias: invalid option: -" << arg[i] << RESET << "\n";
-                    return 1;
-            }
+    // TODO: all this :arrow_down: is absolute shit and should be replaced with a for loop
+    if (args.size() >= 1 && args[0] == "-d") {
+        // delete alias
+        if (args.size() != 2) {
+            std::cerr << RED << "alias: -d requires exactly one argument\n" << RESET;
+            return 1;
         }
-    }
-    else if (arg == "--delete") {
 
-    }
-    else { // this i should propably make better
-        if (args.empty()) {
-            // list all
-            if (aliases.empty()) {
-                std::cout << RED << "alias: no aliases defined." << RESET << std::endl;
-            } else {
-                for (const auto& pair : aliases) {
-                    std::cout << GREEN << "alias " << pair.first << "='" << pair.second << "'\n" << RESET;
-                }
-            }
+        auto it = aliases.find(args[1]);
+        if (it != aliases.end()) {
+            aliases.erase(it);
+            saveAliases();
+            std::cout << "Alias '" << args[1] << "' deleted.\n";
             return 0;
-        }
-
-        if (args.size() == 1) {
-            // show alias
-            auto it = aliases.find(args[0]);
-            if (it != aliases.end()) {
-                std::cout << "alias " << it->first << "='" << it->second << "'\n";
-            } else {
-                std::cout << "alias: " << args[0] << ": not found\n";
-                return 1;
-            }
-            return 0;
-        }
-
-        // set alias: alias name=value or alias name value
-        std::string name = args[0];
-        std::string value;
-
-        if (args.size() == 2) {
-            // check if in format name=value
-            size_t equalPos = name.find('=');
-            if (equalPos != std::string::npos) {
-                value = name.substr(equalPos + 1) + " " + args[1];
-                name = name.substr(0, equalPos);
-            } else {
-                value = args[1];
-            }
         } else {
-            // join args
+            std::cerr << RED << "alias: " << args[1] << ": not found\n" << RESET;
+            return 1;
+        }
+    }
+
+    // this i should propably make better
+    if (args.empty()) {
+        // list all
+        if (aliases.empty()) {
+            std::cout << RED << "alias: no aliases defined." << RESET << std::endl;
+        } else {
+            for (const auto& pair : aliases) {
+                std::cout << GREEN << "alias " << pair.first << "='" << pair.second << "'\n" << RESET;
+            }
+        }
+        return 0;
+    }
+
+    if (args.size() == 1) {
+        // show alias
+        auto it = aliases.find(args[0]);
+        if (it != aliases.end()) {
+            std::cout << "alias " << it->first << "='" << it->second << "'\n";
+        } else {
+            std::cout << "alias: " << args[0] << ": not found\n";
+            return 1;
+        }
+        return 0;
+    }
+
+    // set alias: alias name=value or alias name value
+    std::string name = args[0];
+    std::string value;
+
+    if (args.size() == 2) {
+        // check if in format name=value
+        size_t equalPos = name.find('=');
+        if (equalPos != std::string::npos) {
+            value = name.substr(equalPos + 1) + " " + args[1];
+            name = name.substr(0, equalPos);
+        } else {
+            value = args[1];
+        }
+    } else {
+        // join args
+        std::ostringstream oss;
+        for (size_t i = 1; i < args.size(); i++) {
+            if (i > 1) oss << " ";
+            oss << args[i];
+        }
+        value = oss.str();
+    }
+
+    // handle name=value format in the name itself
+    size_t equalPos = name.find('=');
+    if (equalPos != std::string::npos) {
+        value = name.substr(equalPos + 1);
+        name = name.substr(0, equalPos);
+
+        if (value.empty() && args.size() > 1) {
             std::ostringstream oss;
             for (size_t i = 1; i < args.size(); i++) {
                 if (i > 1) oss << " ";
@@ -145,21 +164,6 @@ int Alias::execute(const std::vector<std::string>& args) {
             value = oss.str();
         }
 
-        // handle name=value format in the name itself
-        size_t equalPos = name.find('=');
-        if (equalPos != std::string::npos) {
-            value = name.substr(equalPos + 1);
-            name = name.substr(0, equalPos);
-
-            if (value.empty() && args.size() > 1) {
-                std::ostringstream oss;
-                for (size_t i = 1; i < args.size(); i++) {
-                    if (i > 1) oss << " ";
-                    oss << args[i];
-                }
-                value = oss.str();
-            }
-        }
 
         if (name.empty()) {
             std::cerr << RED << "alias: invalid alias name\n" << RESET;
