@@ -65,7 +65,11 @@ void Alias::loadAliases() {
 
 void Alias::saveAliases() {
     std::filesystem::path path(aliasFile);
-    std::filesystem::create_directory(path.parent_path()); // generate the dir if it doesnt exist
+
+    // generate the dir if it doesnt exist
+    if (!std::filesystem::exists(path.parent_path())) {
+        std::filesystem::create_directory(path.parent_path());
+    }
 
     std::ofstream file(aliasFile);
     if (!file.is_open()) {
@@ -81,29 +85,60 @@ void Alias::saveAliases() {
 
 int Alias::execute(const std::vector<std::string>& args) {
 
-    // TODO: all this :arrow_down: is absolute shit and should be replaced with a for loop
-    if (args.size() >= 1 && args[0] == "-d") {
-        // delete alias
-        if (args.size() != 2) {
-            std::cerr << RED << "alias: -d requires exactly one argument\n" << RESET;
+    // parse flags
+    bool deleteMode = false;
+    bool endOfOptions = false;
+    std::vector<std::string> positional;
+
+    for (const auto& arg : args) {
+        if (!endOfOptions && !arg.empty() && arg[0] == '-' && arg.size() > 1) {
+            if (arg == "--") { endOfOptions = true; continue; }
+            if (arg.rfind("--", 0) == 0) {
+                if (arg == "--delete") { deleteMode = true; }
+                else {
+                    std::cerr << RED << "alias: unrecognized option '" << arg << "'\n" << RESET;
+                    std::cerr << "Usage: alias [-d|--delete] [--] [name[=value] | name value]" << std::endl;
+                    return 1;
+                }
+                continue;
+            }
+            // short options bundle
+            for (size_t j = 1; j < arg.size(); ++j) {
+                switch (arg[j]) {
+                    case 'd': deleteMode = true; break;
+                    default:
+                        std::cerr << RED << "alias: invalid option -- '" << arg[j] << "'\n" << RESET;
+                        std::cerr << "Usage: alias [-d|--delete] [--] [name[=value] | name value]" << std::endl;
+                        return 1;
+                }
+            }
+        } else {
+            positional.push_back(arg);
+        }
+    }
+
+    // delete
+    if (deleteMode) {
+        if (positional.size() != 1) {
+            std::cerr << RED << "alias: -d/--delete requires exactly one alias name\n" << RESET;
+            std::cerr << "Usage: alias -d <name>" << std::endl;
             return 1;
         }
-
-        auto it = aliases.find(args[1]);
+        const std::string& nameToDelete = positional[0];
+        auto it = aliases.find(nameToDelete);
         if (it != aliases.end()) {
             aliases.erase(it);
             saveAliases();
-            std::cout << "Alias '" << args[1] << "' deleted.\n";
+            std::cout << "Alias '" << nameToDelete << "' deleted." << std::endl;
             return 0;
         } else {
-            std::cerr << RED << "alias: " << args[1] << ": not found\n" << RESET;
+            std::cerr << RED << "alias: " << nameToDelete << ": not found\n" << RESET;
             return 1;
         }
     }
 
-    // this i should propably make better
-    if (args.empty()) {
-        // list all
+    // list
+    if (positional.empty()) {
         if (aliases.empty()) {
             std::cout << RED << "alias: no aliases defined." << RESET << std::endl;
         } else {
@@ -114,41 +149,57 @@ int Alias::execute(const std::vector<std::string>& args) {
         return 0;
     }
 
-    if (args.size() == 1) {
-        // show alias
-        auto it = aliases.find(args[0]);
-        if (it != aliases.end()) {
-            std::cout << "alias " << it->first << "='" << it->second << "'\n";
+    // single positional (show alias or set with name=value without like spaces and shit)
+    if (positional.size() == 1) {
+        std::string name = positional[0];
+        size_t eq = name.find('=');
+        if (eq == std::string::npos) {
+            // show alias
+            auto it = aliases.find(name);
+            if (it != aliases.end()) {
+                std::cout << "alias " << it->first << "='" << it->second << "'\n";
+                return 0;
+            } else {
+                std::cout << "alias: " << name << ": not found\n";
+                return 1;
+            }
         } else {
-            std::cout << "alias: " << args[0] << ": not found\n";
-            return 1;
+            // set alias with inline value
+            std::string value = name.substr(eq + 1);
+            name = name.substr(0, eq);
+            if (name.empty() || value.empty()) {
+                std::cerr << RED << "alias: invalid format. Use name=value or name value\n" << RESET;
+                return 1;
+            }
+            aliases[name] = value;
+            saveAliases();
+            std::cout << "Alias '" << name << "' set to '" << value << "'\n";
+            return 0;
         }
-        return 0;
     }
 
-    // set alias: alias name=value or alias name value
-    std::string name = args[0];
+    // multiple positionals (name = value)
+    std::string name = positional[0];
     std::string value;
 
-    size_t equalPos = name.find('=');
-    if (equalPos != std::string::npos) {
-        value = name.substr(equalPos + 1);
-        name = name.substr(0, equalPos);
-    } else {
-        // join remaining args as value (tokenizer drops standalone '=')
-        std::ostringstream oss;
-        for (size_t i = 1; i < args.size(); i++) {
-            if (i > 1) oss << " ";
-            oss << args[i];
+    size_t eq = name.find('=');
+    if (eq != std::string::npos) {
+        value = name.substr(eq + 1);
+        name = name.substr(0, eq);
+        if (positional.size() > 1) {
+            std::ostringstream oss; if (!value.empty()) oss << value;
+            for (size_t i = 1; i < positional.size(); ++i) {
+                if (oss.tellp() > 0) oss << ' ';
+                oss << positional[i];
+            }
+            value = oss.str();
         }
-        value = oss.str();
-    }
-
-    if (value.empty() && args.size() > 1) {
+    } else {
+        // name then value tokens
         std::ostringstream oss;
-        for (size_t i = 1; i < args.size(); i++) {
-            if (i > 1) oss << " ";
-            oss << args[i];
+        for (size_t i = 1; i < positional.size(); ++i) {
+            if (i > 1) oss << ' ';
+            oss << positional[i];
         }
         value = oss.str();
     }
