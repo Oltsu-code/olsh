@@ -130,17 +130,12 @@ int Alias::execute(const std::vector<std::string>& args) {
     std::string name = args[0];
     std::string value;
 
-    if (args.size() == 2) {
-        // check if in format name=value
-        size_t equalPos = name.find('=');
-        if (equalPos != std::string::npos) {
-            value = name.substr(equalPos + 1) + " " + args[1];
-            name = name.substr(0, equalPos);
-        } else {
-            value = args[1];
-        }
+    size_t equalPos = name.find('=');
+    if (equalPos != std::string::npos) {
+        value = name.substr(equalPos + 1);
+        name = name.substr(0, equalPos);
     } else {
-        // join args
+        // join remaining args as value (tokenizer drops standalone '=')
         std::ostringstream oss;
         for (size_t i = 1; i < args.size(); i++) {
             if (i > 1) oss << " ";
@@ -149,38 +144,29 @@ int Alias::execute(const std::vector<std::string>& args) {
         value = oss.str();
     }
 
-    // handle name=value format in the name itself
-    size_t equalPos = name.find('=');
-    if (equalPos != std::string::npos) {
-        value = name.substr(equalPos + 1);
-        name = name.substr(0, equalPos);
-
-        if (value.empty() && args.size() > 1) {
-            std::ostringstream oss;
-            for (size_t i = 1; i < args.size(); i++) {
-                if (i > 1) oss << " ";
-                oss << args[i];
-            }
-            value = oss.str();
+    if (value.empty() && args.size() > 1) {
+        std::ostringstream oss;
+        for (size_t i = 1; i < args.size(); i++) {
+            if (i > 1) oss << " ";
+            oss << args[i];
         }
+        value = oss.str();
+    }
 
+    if (name.empty()) {
+        std::cerr << RED << "alias: invalid alias name\n" << RESET;
+        return 1;
+    }
 
-        if (name.empty()) {
-            std::cerr << RED << "alias: invalid alias name\n" << RESET;
-            return 1;
-        }
+    if (value.empty()) {
+        std::cerr << RED << "alias: no value specified for alias '" << name << "'\n" << RESET;
+        return 1;
+    }
 
-        if (value.empty()) {
-            std::cerr << RED << "alias: no value specified for alias '" << name << "'\n" << RESET;
-            return 1;
-        }
-
-        aliases[name] = value;
-        saveAliases();
-
-        std::cout << "Alias '" << name << "' set to '" << value << "'\n";
-        return 0;
-    }  
+    aliases[name] = value;
+    saveAliases();
+    std::cout << "Alias '" << name << "' set to '" << value << "'\n";
+    return 0;
 }
 
 std::string Alias::expandAlias(const std::string& command) {
