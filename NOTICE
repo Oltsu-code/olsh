@@ -1,0 +1,12 @@
+Attribution Notice
+
+Project: olshell
+License: PolyForm Noncommercial License 1.0.0 (SPDX: PolyForm-Noncommercial-1.0.0)
+
+Required credit
+- Preserve this NOTICE file and the LICENSE file in source and binary distributions.
+- In forks, redistributions, or derivative works, include this line (or a close equivalent) in the README or documentation:
+
+  This project is based on “olshell” by Oltsu-code (github.com/oltsu-code/olsh), licensed under PolyForm Noncommercial 1.0.0.
+
+- Where reasonably practical (e.g., app About screen or site footer), include: © 2025 Oltsu-code.
