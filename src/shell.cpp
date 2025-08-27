@@ -79,12 +79,12 @@ void Shell::displayPrompt() {
     std::string cwd = Utils::Fs::normalizePath(std::filesystem::current_path().string());
 
     std::cout
-        << BOLD_BLUE  << "┌─("
-        << RED        << user << "@" << hostname
-        << BOLD_BLUE  << ")-["
-        << GREEN      << cwd
-        << BOLD_BLUE  << "]\n"
-        << BOLD_BLUE  << "└─$ "
+        << BOLD_CYAN  << "┌─("
+        << MAGENTA        << user << "@" << hostname
+        << BOLD_CYAN  << ")-["
+        << MAGENTA      << cwd
+        << BOLD_CYAN  << "]\n"
+        << BOLD_CYAN  << "└─$ "
         << RESET;
 }
 
