@@ -1,0 +1,35 @@
+#!/bin/olshell
+# variable
+set NAME = $1
+echo "Hello, $NAME!"
+# arithmetic
+set NUM = $((1 + 2 + 3))
+echo NUM=$NUM
+# command substitution (built-in)
+set FILES = `echo one two three`
+echo files:$FILES
+# conditionals
+if [ $NUM -eq 6 ]; then
+echo "six ok"
+elif [ $NUM -gt 6 ]; then
+echo "too big"
+else
+echo "too small"
+fi
+# for loop
+for X in a b c; do
+echo item:$X
+done
+# while loop
+set COUNT = 0
+while [ $COUNT -lt 3 ]; do
+echo cnt:$COUNT
+set COUNT = $((COUNT + 1))
+done
+# function
+a=bogus
+function greet {
+  echo "Hello from func, $1!"
+}
+greet $NAME
+

@@ -6,6 +6,8 @@
 #include <conio.h>
 #include <set>
 #include <sstream>
+#include <vector>
+#include <cctype>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -45,7 +47,7 @@ void Shell::run() {
         std::string input = readInputWithAutocomplete();
         if (!input.empty()) {
             historyManager->addCommand(input);
-            processCommand(input);
+            (void)processCommand(input);
         }
     }
 }
@@ -80,9 +82,9 @@ void Shell::displayPrompt() {
 
     std::cout
         << BOLD_CYAN  << "┌─("
-        << MAGENTA        << user << "@" << hostname
+        << MAGENTA    << user << "@" << hostname
         << BOLD_CYAN  << ")-["
-        << MAGENTA      << cwd
+        << MAGENTA    << cwd
         << BOLD_CYAN  << "]\n"
         << BOLD_CYAN  << "└─$ "
         << RESET;
@@ -91,13 +93,19 @@ void Shell::displayPrompt() {
 
 std::string Shell::readInput() {
     std::string input;
-    std::getline(std::cin, input);
+    if (!std::getline(std::cin, input)) {
+        running = false;
+        return std::string();
+    }
     return input;
 }
 
 std::string Shell::readInputWithAutocomplete() {
     std::string input;
-    std::getline(std::cin, input);
+    if (!std::getline(std::cin, input)) {
+        running = false;
+        return std::string();
+    }
 
     return input;
 }
@@ -129,16 +137,31 @@ void Shell::handleTabCompletion(std::string& input, size_t& cursorPos) {
     }
 }
 
-void Shell::processCommand(const std::string& input) {
+static std::vector<std::string> split_args_quoted(const std::string& s) {
+    std::vector<std::string> out; std::string cur; bool in_s=false, in_d=false;
+    for (size_t i=0;i<s.size();++i){ char c=s[i];
+        if (c=='\\' && i+1<s.size()) { cur.push_back(s[++i]); continue; }
+        if (c=='"' && !in_s) { in_d=!in_d; continue; }
+        if (c=='\'' && !in_d) { in_s=!in_s; continue; }
+        if (!in_s && !in_d && std::isspace((unsigned char)c)) { if(!cur.empty()){ out.push_back(cur); cur.clear(); } }
+        else cur.push_back(c);
+    }
+    if (!cur.empty()) out.push_back(cur);
+    return out;
+}
+
+int Shell::processCommand(const std::string& input) {
     if (input == "exit") {
         exit();
-        return;
+        return 0;
     }
 
-    // check if is a script file
-    if (scriptInterpreter->isScriptFile(input)) {
-        scriptInterpreter->executeScript(input);
-        return;
+    // detect script invocation with args
+    std::vector<std::string> parts = split_args_quoted(input);
+    if (!parts.empty() && scriptInterpreter->isScriptFile(parts[0])) {
+        std::vector<std::string> args;
+        if (parts.size() > 1) args.assign(parts.begin()+1, parts.end());
+        return scriptInterpreter->executeScript(parts[0], args);
     }
 
     // expand aliases
@@ -159,7 +182,7 @@ void Shell::processCommand(const std::string& input) {
     auto command = parser->parse(expandedInput);
 
     // execute the command
-    executor->execute(std::move(command));
+    return executor->execute(std::move(command));
 }
 
 void Shell::exit() {

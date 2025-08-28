@@ -35,7 +35,7 @@ public:
     ~Shell();
     void run();
     void exit();
-    void processCommand(const std::string& input);
+    int processCommand(const std::string& input);
 };
 
 }
