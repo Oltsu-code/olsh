@@ -153,6 +153,7 @@ int Ls::execute(const std::vector<std::string>& args) {
         return filename;
     };
 
+    // perms 
     auto permsStr = [&](std::filesystem::perms p, bool isDir) -> std::string {
         std::string bits;
         bits += isDir ? 'd' : '-';
