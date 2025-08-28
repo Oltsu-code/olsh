@@ -1,7 +1,7 @@
 #include "../../include/builtins/alias.h"
+#include "../../include/utils/fs.h"
 #include <utils/colors.h>
 #include <filesystem>
-#include "../../include/utils/fs.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
