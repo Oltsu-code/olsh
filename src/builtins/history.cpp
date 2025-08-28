@@ -27,7 +27,7 @@ History::History() : maxHistorySize(1000) {
 #else
     char* homeDir = getenv("HOME");
     if (homeDir != nullptr) {
-        historyFile = std::string(homeDir) + "/.olsh_history";
+        historyFile = std::string(homeDir) + "/.olshell/history";
     } else {
         historyFile = ".olsh_history";
     }

@@ -29,7 +29,7 @@ Alias::Alias() {
 #else
     char* homeDir = getenv("HOME");
     if (homeDir != nullptr) {
-        aliasFile = std::string(homeDir) + "/.olsh_aliases";
+        aliasFile = std::string(homeDir) + "/.olshell/aliases";
     } else {
         aliasFile = ".olsh_aliases";
     }
