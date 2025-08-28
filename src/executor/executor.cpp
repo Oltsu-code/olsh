@@ -1,5 +1,8 @@
 #include "../../include/executor/executor.h"
 #include "../../include/executor/process.h"
+#include "../../include/parser/ast.h"
+#include "../../include/parser/parser.h"
+#include "../../include/builtins/builtin_registry.h"
 #include <utils/colors.h>
 #include <iostream>
 
@@ -28,6 +31,9 @@ int Executor::execute(std::unique_ptr<Parser::ASTNode> node) {
 }
 
 int Executor::executeCommand(const Parser::Command& cmd) {
+
+    //! depricated
+    /*
     if (cmd.getType() == Parser::CommandType::BUILTIN) {
         // exceute the builtins TODO: make this with a better way then whatever ts is
 
@@ -47,6 +53,14 @@ int Executor::executeCommand(const Parser::Command& cmd) {
                   << "This is probably a problem the parser. Please open a issue for this.\n"
                   << RESET;
         return 1;
+    }
+    */
+
+    //* trying this new thingy out
+
+    // builtins
+    if (cmd.getType() == Parser::CommandType::BUILTIN) {
+        return getBuiltinRegistry().execute(cmd.name, cmd.args);
     }
 
     // externals

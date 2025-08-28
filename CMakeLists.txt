@@ -29,4 +29,6 @@ add_executable(olshell
         src/utils/windows_compat.cpp
         src/utils/autocomplete.cpp
         src/utils/script.cpp
+        src/builtins/builtin_registery.cpp
+        include/builtins/builtin_registry.h
 )
