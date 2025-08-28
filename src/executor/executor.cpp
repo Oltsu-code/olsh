@@ -31,33 +31,6 @@ int Executor::execute(std::unique_ptr<Parser::ASTNode> node) {
 }
 
 int Executor::executeCommand(const Parser::Command& cmd) {
-
-    //! depricated
-    /*
-    if (cmd.getType() == Parser::CommandType::BUILTIN) {
-        // exceute the builtins TODO: make this with a better way then whatever ts is
-
-        if (cmd.name == "cd") return cdCommand.execute(cmd.args);
-        if (cmd.name == "ls") return lsCommand.execute(cmd.args);
-        if (cmd.name == "pwd") return pwdCommand.execute(cmd.args);
-        if (cmd.name == "echo") return echoCommand.execute(cmd.args);
-        if (cmd.name == "rm") return rmCommand.execute(cmd.args);
-        if (cmd.name == "cat") return catCommand.execute(cmd.args);
-        if (cmd.name == "clear") return clearCommand.execute(cmd.args);
-        if (cmd.name == "history") return historyCommand.execute(cmd.args);
-        if (cmd.name == "alias") return aliasCommand.execute(cmd.args);
-
-        // if none of those match.
-        std::cerr << RED
-                  << "Error: Unknown builtin command: " << cmd.name << "\n"
-                  << "This is probably a problem the parser. Please open a issue for this.\n"
-                  << RESET;
-        return 1;
-    }
-    */
-
-    //* trying this new thingy out
-
     // builtins
     if (cmd.getType() == Parser::CommandType::BUILTIN) {
         return getBuiltinRegistry().execute(cmd.name, cmd.args);
