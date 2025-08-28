@@ -24,6 +24,7 @@ add_executable(olshell
         src/builtins/clear.cpp
         src/builtins/history.cpp
         src/builtins/alias.cpp
+        src/builtins/weather.cpp
         src/utils/fs.cpp
         src/utils/string.cpp
         src/utils/windows_compat.cpp

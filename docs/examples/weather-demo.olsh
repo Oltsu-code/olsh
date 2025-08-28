@@ -1,0 +1,27 @@
+#!/usr/bin/env olsh
+# Example script showcasing the weather feature
+
+echo "Welcome to the OLSH Weather Demo! 🌤️"
+echo
+
+# Check weather for multiple cities
+echo "Checking weather around the world..."
+echo
+
+echo "📍 Weather in Tokyo:"
+weather Tokyo
+echo
+
+echo "📍 Weather in London:"
+weather London
+echo
+
+echo "📍 Weather in New York:"
+weather "New York"
+echo
+
+echo "📍 Default location weather:"
+weather
+echo
+
+echo "Demo complete! Use 'weather [city]' to check any city's weather 🌍"

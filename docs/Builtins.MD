@@ -16,6 +16,7 @@ Like every other shell, even this one has builtins.
 | `pwd`                                         | Print the current working directory                                                                                                                                                                                       |
 | `echo [-n] <text>`                            | Print text to the console. You can also use `-n` to skip creating a new line                                                                                                                                              |
 | `rm [-r] [-f] <path (or dir)>`                | Remove a path or dir with `-r`. To skip all protections, use `-f` to force delete                                                                                                                                         |
+| `weather [city]`                              | Get current weather and forecast for a city. If no city is specified, uses default location. Requires Ruby to be installed.                                                                                              |
 
 ## Notes
 - All the flags can be combined, e.g. `ls -la` or `rm -rf`

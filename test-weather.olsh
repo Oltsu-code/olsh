@@ -1,0 +1,17 @@
+echo "Testing OLSH Weather Feature"
+echo "============================"
+echo
+
+echo "Trying weather command (should show Ruby installation message):"
+weather
+
+echo
+echo "Weather command test completed!"
+echo
+
+echo "Available commands:"
+echo "- weather [city] : Get weather for any city"
+echo "- Example: weather Tokyo"
+echo "- Example: weather \"New York\""
+
+exit
