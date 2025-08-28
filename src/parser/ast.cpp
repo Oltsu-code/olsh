@@ -6,6 +6,8 @@ Command::Command(const std::string& cmdName, const std::vector<std::string>& arg
     : name(cmdName), args(arguments) {}
 
 CommandType Command::getType() const {
+    // TODO: add some way to skip builtins (execute externals with the same name)
+    // TODO: propably make the if statement below better
     // builtins
     if (name == "cd" || name == "ls" || name == "pwd" || name == "echo" ||
         name == "rm" || name == "cat" || name == "clear" ||
