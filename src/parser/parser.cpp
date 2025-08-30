@@ -104,7 +104,7 @@ std::unique_ptr<Parser::ASTNode> CommandParser::parse(const std::string& input) 
         return parseRedirection(std::move(pipeline));
     }
 
-    // no pipeliney
+    // no pipeline
     current = saved_pos;
     auto command = parseCommand();
     if (command) {
