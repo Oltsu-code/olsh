@@ -2,6 +2,10 @@
 .idea/
 cmake-build-*/
 
+# VSCode build files
+.vscode/
+build/
+
 # CMake generated files
 CMakeFiles/
 CMakeCache.txt
@@ -34,3 +38,9 @@ Makefile
 
 # Misc
 *.VSCode
+
+# Python files
+*.pyc
+*.pyo
+__pycache__/
+.venv/

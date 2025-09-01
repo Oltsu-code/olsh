@@ -59,6 +59,22 @@ std::unique_ptr<Parser::Pipeline> CommandParser::parsePipeline() {
         }
     }
 
+    while (match(Parser::TokenType::SEMICOLON)) {
+        cmd = parseCommand();
+        if (cmd) {
+            commands.push_back(std::move(cmd));
+        }
+    }
+
+    while (match(Parser::TokenType::AMPERSAND)) {
+        cmd = parseCommand();
+        if (cmd) {
+            commands.push_back(std::move(cmd));
+        }
+    }
+
+
+
     if (commands.size() == 1) {
         // return directly
         return nullptr;

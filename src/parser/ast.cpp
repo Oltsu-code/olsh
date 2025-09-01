@@ -9,6 +9,7 @@ Command::Command(const std::string& cmdName, const std::vector<std::string>& arg
 CommandType Command::getType() const {
     // TODO: add some way to skip builtins (execute externals with the same name)
 
+
     // builtin
     if (getBuiltinRegistry().isBuiltin(name)) {
         return CommandType::BUILTIN;

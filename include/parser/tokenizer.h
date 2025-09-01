@@ -13,7 +13,8 @@ enum class TokenType {
     REDIRECT_IN,
     REDIRECT_APPEND,
     SEMICOLON,
-    END_OF_INPUT
+    END_OF_INPUT,
+    AMPERSAND
 };
 
 struct Token {

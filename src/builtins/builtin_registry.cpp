@@ -8,6 +8,7 @@
 #include "../../include/builtins/clear.h"
 #include "../../include/builtins/history.h"
 #include "../../include/builtins/alias.h"
+#include "../../include/builtins/config.h"
 
 namespace olsh {
 
@@ -25,6 +26,7 @@ void BuiltinRegistry::registerCommands() {
     Builtins::Clear clearCommand;
     Builtins::History historyCommand;
     Builtins::Alias aliasCommand;
+    Builtins::Config configCommand;
 
     commands["cd"] = [cdCommand](const std::vector<std::string>& args) mutable { return cdCommand.execute(args); };
     commands["ls"] = [lsCommand](const std::vector<std::string>& args) mutable { return lsCommand.execute(args); };
@@ -35,6 +37,7 @@ void BuiltinRegistry::registerCommands() {
     commands["clear"] = [clearCommand](const std::vector<std::string>& args) mutable { return clearCommand.execute(args); };
     commands["history"] = [historyCommand](const std::vector<std::string>& args) mutable { return historyCommand.execute(args); };
     commands["alias"] = [aliasCommand](const std::vector<std::string>& args) mutable { return aliasCommand.execute(args); };
+    commands["config"] = [configCommand](const std::vector<std::string>& args) mutable { return configCommand.execute(args); };
 }
 
 bool BuiltinRegistry::isBuiltin(const std::string& command) const {

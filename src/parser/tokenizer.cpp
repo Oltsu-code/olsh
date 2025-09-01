@@ -93,6 +93,10 @@ std::vector<Token> Tokenizer::tokenize() {
             case '\'':
                 tokens.emplace_back(TokenType::WORD, readQuotedString(ch));
                 break;
+            case '&':
+                tokens.emplace_back(TokenType::AMPERSAND, "&");
+                advance();
+                break;
             default:
                 if (std::isalnum(ch) || ch == '.' || ch == '/' || ch == '\\' ||
                     ch == '-' || ch == '_' || ch == '~' || ch == '*' || ch == '?') {

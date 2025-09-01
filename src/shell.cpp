@@ -1,58 +1,152 @@
+// shell.cpp - the brain of olshell, now with 100% less insanity
+// completely rewritten to use the smart input system
+
 #include "../include/shell.h"
 #include "../include/utils/fs.h"
+#include "../include/builtins/config.h"
+#include "../include/utils/linenoise.h"
 #include <utils/colors.h>
 #include <iostream>
 #include <filesystem>
-#include <conio.h>
-#include <set>
 #include <sstream>
 #include <vector>
 #include <cctype>
+#include <atomic>
 
 #ifdef _WIN32
 #include <windows.h>
 #else
-#include <termios.h>
 #include <unistd.h>
+#include <signal.h>
 #endif
 
 namespace olsh {
 
+// static interrupt flag - because ctrl+c should just work
+std::atomic<bool> Shell::s_interrupted{false};
+
 Shell::Shell() : running(true) {
+    // init
     parser = std::make_unique<CommandParser>();
     executor = std::make_unique<Executor>();
-    autocomplete = std::make_unique<Utils::Autocomplete>();
     scriptInterpreter = std::make_unique<Utils::ScriptInterpreter>(this);
     aliasManager = std::make_unique<Builtins::Alias>();
     historyManager = std::make_unique<Builtins::History>();
-    currentDirectory = std::filesystem::current_path().string();
-
+    configManager = std::make_unique<Utils::Config>();
+    autocompleteManager = std::make_unique<Utils::Autocomplete>();
+    
+    // give autocompleate aliases
     auto aliases = aliasManager->getAliases();
     std::set<std::string> aliasNames;
     for (const auto& pair : aliases) {
         aliasNames.insert(pair.first);
     }
-    autocomplete->updateAliases(aliasNames);
+    autocompleteManager->updateAliases(aliasNames);
+    
+    // init inputmanager
+    inputManager = std::make_unique<Utils::InputManager>();
+    Utils::InputManager::setShellInstance(this);
+
+    // set shell instance for config builtin
+    Builtins::Config::setShellInstance(this);
+
+    // set history instance for linenoise
+    linenoiseSetHistoryInstance(historyManager.get());
+
+    // load history
+    std::string historyFile = configManager->getSetting("config_dir", "") + "/.olshell/history";
+    inputManager->loadHistory(historyFile);
+    
+    currentDirectory = std::filesystem::current_path().string();
 }
 
 Shell::~Shell() = default;
 
 void Shell::run() {
-    // print da cool message
-    std::cout << "OlShell v2.0 - Best shell ever made yk. Pls delete bash, zsh and every other shell u have on ur computer to use this.\n";
-    std::cout << "run 'help' for commands and 'exit' to quit.\n\n";
-
+    // show welcome message from config
+    std::string welcomeMessage = configManager->getSetting("welcome_message", 
+        "OlShell v2.0 - Best shell ever made yk. Pls delete bash, zsh and every other shell u have on ur computer to use this.");
+    std::cout << welcomeMessage << "\n";
+    
     while (running) {
-        displayPrompt();
-        std::string input = readInputWithAutocomplete();
-        if (!input.empty()) {
-            historyManager->addCommand(input);
-            (void)processCommand(input);
+        std::string promptStr = getPromptString();
+        std::string input = inputManager->readLine(promptStr);
+        
+        // check for interrupt
+        if (s_interrupted.exchange(false, std::memory_order_acq_rel)) {
+            std::cout << std::endl;
+            continue;
         }
+        
+        // empty input
+        if (input.empty()) {
+            continue;
+        }
+        
+        // add to history
+        historyManager->addCommand(input);
+        
+        // process the command
+        (void)processCommand(input);
     }
 }
 
-void Shell::displayPrompt() {
+void Shell::notifyInterrupted() {
+    s_interrupted.store(true, std::memory_order_release);
+}
+
+std::string Shell::getPromptString() {
+    std::string promptTemplate = configManager->getPrompt();
+    
+    // check if using the default fancy prompt
+    if (promptTemplate.find("┌─({user}@{hostname})-[{cwd}]") != std::string::npos) {
+        // use the original colored fancy prompt
+        std::string user = "user";
+        std::string hostname = "host";
+
+#ifdef _WIN32
+        char username[256];
+        DWORD username_len = 256;
+        if (GetUserNameA(username, &username_len)) {
+            user = username;
+        }
+
+        char computerName[256];
+        DWORD size = 256;
+        if (GetComputerNameA(computerName, &size)) {
+            hostname = computerName;
+        }
+#else
+        const char* login = getlogin();
+        if (login) user = login;
+
+        char hostbuf[256];
+        if (gethostname(hostbuf, sizeof(hostbuf)) == 0) {
+            hostname = hostbuf;
+        }
+#endif
+
+        std::string cwd = Utils::Fs::normalizePath(std::filesystem::current_path().string());
+
+        // build the fancy colored prompt
+        std::ostringstream prompt;
+        prompt << BOLD_CYAN  << "┌─("
+               << MAGENTA    << user << "@" << hostname
+               << BOLD_CYAN  << ")-["
+               << MAGENTA    << cwd
+               << BOLD_CYAN  << "]\n"
+               << BOLD_CYAN  << "└─$ "
+               << RESET;
+        
+        return prompt.str();
+    } else {
+        // use custom prompt template
+        return expandPromptVariables(promptTemplate) + RESET;
+    }
+}
+
+std::string Shell::expandPromptVariables(const std::string& promptTemplate) {
+    std::string result = promptTemplate;
     std::string user = "user";
     std::string hostname = "host";
 
@@ -80,115 +174,85 @@ void Shell::displayPrompt() {
 
     std::string cwd = Utils::Fs::normalizePath(std::filesystem::current_path().string());
 
-    std::cout
-        << BOLD_CYAN  << "┌─("
-        << MAGENTA    << user << "@" << hostname
-        << BOLD_CYAN  << ")-["
-        << MAGENTA    << cwd
-        << BOLD_CYAN  << "]\n"
-        << BOLD_CYAN  << "└─$ "
-        << RESET;
-}
-
-
-std::string Shell::readInput() {
-    std::string input;
-    if (!std::getline(std::cin, input)) {
-        running = false;
-        return std::string();
+    // replace variables in the prompt template
+    size_t pos = 0;
+    while ((pos = result.find("{user}", pos)) != std::string::npos) {
+        result.replace(pos, 6, user);
+        pos += user.length();
     }
-    return input;
-}
-
-std::string Shell::readInputWithAutocomplete() {
-    std::string input;
-    if (!std::getline(std::cin, input)) {
-        running = false;
-        return std::string();
+    
+    pos = 0;
+    while ((pos = result.find("{hostname}", pos)) != std::string::npos) {
+        result.replace(pos, 10, hostname);
+        pos += hostname.length();
+    }
+    
+    pos = 0;
+    while ((pos = result.find("{cwd}", pos)) != std::string::npos) {
+        result.replace(pos, 5, cwd);
+        pos += cwd.length();
     }
 
-    return input;
-}
-
-void Shell::handleTabCompletion(std::string& input, size_t& cursorPos) {
-    auto completions = autocomplete->complete(input, cursorPos);
-
-    if (completions.empty()) {
-        return;
-    }
-
-    if (completions.size() == 1) {
-        size_t wordStart = cursorPos;
-        while (wordStart > 0 && input[wordStart - 1] != ' ') {
-            wordStart--;
-        }
-
-        std::string prefix = input.substr(wordStart, cursorPos - wordStart);
-        std::string completion = completions[0];
-
-        input.replace(wordStart, cursorPos - wordStart, completion);
-        cursorPos = wordStart + completion.length();
-    } else {
-        std::cout << std::endl;
-        for (const auto& completion : completions) {
-            std::cout << completion << "  ";
-        }
-        std::cout << std::endl;
-    }
-}
-
-static std::vector<std::string> split_args_quoted(const std::string& s) {
-    std::vector<std::string> out; std::string cur; bool in_s=false, in_d=false;
-    for (size_t i=0;i<s.size();++i){ char c=s[i];
-        if (c=='\\' && i+1<s.size()) { cur.push_back(s[++i]); continue; }
-        if (c=='"' && !in_s) { in_d=!in_d; continue; }
-        if (c=='\'' && !in_d) { in_s=!in_s; continue; }
-        if (!in_s && !in_d && std::isspace((unsigned char)c)) { if(!cur.empty()){ out.push_back(cur); cur.clear(); } }
-        else cur.push_back(c);
-    }
-    if (!cur.empty()) out.push_back(cur);
-    return out;
+    return result;
 }
 
 int Shell::processCommand(const std::string& input) {
+    // exit command (quick check before parsing)
     if (input == "exit") {
         exit();
         return 0;
     }
 
-    // detect script invocation with args
-    std::vector<std::string> parts = split_args_quoted(input);
-    if (!parts.empty() && scriptInterpreter->isScriptFile(parts[0])) {
+    // check for script execution (extract first word for script check)
+    std::istringstream iss(input);
+    std::string firstWord;
+    if (!(iss >> firstWord)) {
+        return 0; // empty input
+    }
+    
+    if (scriptInterpreter->isScriptFile(firstWord)) {
         std::vector<std::string> args;
-        if (parts.size() > 1) args.assign(parts.begin()+1, parts.end());
-        return scriptInterpreter->executeScript(parts[0], args);
+        std::string arg;
+        while (iss >> arg) {
+            args.push_back(arg);
+        }
+        return scriptInterpreter->executeScript(firstWord, args);
     }
 
     // expand aliases
     std::string expandedInput = input;
-    std::istringstream iss(input);
-    std::string firstWord;
-    iss >> firstWord;
-
-    if (!firstWord.empty()) {
-        std::string aliasExpansion = aliasManager->expandAlias(firstWord);
-        if (aliasExpansion != firstWord) {
-            std::string rest = input.substr(firstWord.length());
-            expandedInput = aliasExpansion + rest;
-        }
+    std::string aliasExpansion = aliasManager->expandAlias(firstWord);
+    if (aliasExpansion != firstWord) {
+        std::string rest = input.substr(firstWord.length());
+        expandedInput = aliasExpansion + rest;
     }
 
-    // parse the command
+    // let the proper parser handle everything
     auto command = parser->parse(expandedInput);
 
-    // execute the command
+    // validate command
+    if (!command) {
+        std::cerr << "Failed to parse command: " << expandedInput << std::endl;
+        return -1;
+    }
+
+    // execute command
     return executor->execute(std::move(command));
 }
 
 void Shell::exit() {
-    std::cout << "why quit :(\n";
+    std::cout << BLUE << "bye...\n"
+              << BLUE << "hope ill see you again soon :(\n";
     std::cout << RESET;
     running = false;
+}
+
+// autocomplete interface for input manager
+std::vector<std::string> Shell::autocomplete(const std::string& input, size_t cursorPos) {
+    if (autocompleteManager) {
+        return autocompleteManager->complete(input, cursorPos);
+    }
+    return {};
 }
 
 }
