@@ -1,0 +1,207 @@
+name: OlShell Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build-and-test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        build-type: [Debug, Release]
+        
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        
+    - name: Install CMake and Ninja (Ubuntu)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cmake ninja-build build-essential
+        
+    - name: Install CMake and Ninja (macOS)
+      if: matrix.os == 'macos-latest'
+      run: |
+        brew install cmake ninja
+        
+    - name: Install CMake and Ninja (Windows)
+      if: matrix.os == 'windows-latest'
+      uses: crazy-max/ghaction-chocolatey@v3
+      with:
+        args: install cmake ninja
+        
+    - name: Configure CMake (Unix)
+      if: matrix.os != 'windows-latest'
+      run: |
+        cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=${{ matrix.build-type }}
+        
+    - name: Configure CMake (Windows)
+      if: matrix.os == 'windows-latest'
+      run: |
+        cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=${{ matrix.build-type }}
+        
+    - name: Build olshell
+      run: |
+        cmake --build build --config ${{ matrix.build-type }}
+        
+    - name: Verify executable exists (Unix)
+      if: matrix.os != 'windows-latest'
+      run: |
+        ls -la build/
+        test -f build/olshell
+        
+    - name: Verify executable exists (Windows)
+      if: matrix.os == 'windows-latest'
+      run: |
+        dir build\
+        if (!(Test-Path "build\olshell.exe")) { throw "olshell.exe not found" }
+      shell: powershell
+        
+    - name: Run comprehensive tests
+      run: |
+        cd tests
+        python run_tests.py comprehensive
+      env:
+        OLSHELL_TEST_PATH: ${{ matrix.os == 'windows-latest' && 'build/olshell.exe' || 'build/olshell' }}
+        
+    - name: Run input handling tests
+      run: |
+        cd tests
+        python run_tests.py input
+      env:
+        OLSHELL_TEST_PATH: ${{ matrix.os == 'windows-latest' && 'build/olshell.exe' || 'build/olshell' }}
+        
+    - name: Run performance tests
+      run: |
+        cd tests
+        python run_tests.py performance
+      env:
+        OLSHELL_TEST_PATH: ${{ matrix.os == 'windows-latest' && 'build/olshell.exe' || 'build/olshell' }}
+        
+    - name: Run edge case tests
+      run: |
+        cd tests
+        python run_tests.py edge
+      env:
+        OLSHELL_TEST_PATH: ${{ matrix.os == 'windows-latest' && 'build/olshell.exe' || 'build/olshell' }}
+        
+    - name: Run all tests together
+      run: |
+        cd tests
+        python run_tests.py
+      env:
+        OLSHELL_TEST_PATH: ${{ matrix.os == 'windows-latest' && 'build/olshell.exe' || 'build/olshell' }}
+
+  code-quality:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Install clang-format
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y clang-format
+        
+    - name: Check code formatting
+      run: |
+        find src include -name "*.cpp" -o -name "*.h" | xargs clang-format --dry-run --Werror
+        
+    - name: Install cppcheck
+      run: |
+        sudo apt-get install -y cppcheck
+        
+    - name: Run static analysis
+      run: |
+        cppcheck --enable=all --error-exitcode=1 --suppress=missingIncludeSystem src/ include/
+        
+    - name: Set up Python for test linting
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        
+    - name: Install Python linting tools
+      run: |
+        pip install flake8 black
+        
+    - name: Lint Python tests
+      run: |
+        flake8 tests/ --max-line-length=100 --ignore=E203,W503
+        
+    - name: Check Python test formatting
+      run: |
+        black --check tests/
+
+  documentation:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Check documentation files exist
+      run: |
+        test -f README.MD
+        test -f docs/Builtins.MD
+        test -f docs/Pipeline.MD
+        test -f docs/Scripting.MD
+        
+    - name: Validate example scripts
+      run: |
+        test -f quick-test.olsh
+        test -f docs/examples/example-script.olsh
+        
+    - name: Check license files
+      run: |
+        test -f LICENSE
+        test -f NOTICE
+
+  integration-test:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cmake ninja-build build-essential
+        
+    - name: Build olshell
+      run: |
+        cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+        cmake --build build --config Release
+        
+    - name: Test example scripts
+      run: |
+        ./build/olshell < quick-test.olsh
+        ./build/olshell < docs/examples/example-script.olsh
+        
+    - name: Integration test with configuration
+      run: |
+        mkdir -p ~/.olshell
+        echo "prompt: 'integration-test> '" > ~/.olshell/config.yaml
+        echo 'echo "Config test successful"' | ./build/olshell
+        
+    - name: Test shell interactive features
+      run: |
+        echo -e 'pwd\nls\necho "Integration complete"' | timeout 10s ./build/olshell || true

@@ -24,10 +24,14 @@ add_executable(olshell
         src/builtins/clear.cpp
         src/builtins/history.cpp
         src/builtins/alias.cpp
+        src/builtins/config.cpp
         src/utils/fs.cpp
         src/utils/string.cpp
         src/utils/windows_compat.cpp
         src/utils/autocomplete.cpp
         src/utils/script.cpp
+        src/utils/config.cpp
+        src/utils/linenoise.cpp
+        src/utils/input_manager.cpp
         src/builtins/builtin_registry.cpp
 )
