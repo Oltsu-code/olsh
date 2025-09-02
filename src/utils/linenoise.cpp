@@ -1,11 +1,3 @@
-//* better way to do the terminal input handling
-
-/*  
-    TODO: every time a key is pressed, the fucking prompt gets duplicated
-    why? i dont fucking know
-    can someone smarter then me PLEASE HELP
-*/
-
 #include "utils/linenoise.h"
 #include "builtins/history.h"
 #include <iostream>
@@ -49,6 +41,8 @@ void linenoiseAddCompletion(linenoiseCompletions* lc, const char* str) {
 }
 
 char* linenoise(const char* prompt) {
+    const char* prompt_end =
+        (prompt ? (strrchr(prompt, '\n') ? strrchr(prompt, '\n') + 1 : prompt) : "");
     std::cout << prompt << std::flush;
     
 #ifdef _WIN32
@@ -132,7 +126,7 @@ char* linenoise(const char* prompt) {
                     cursor_pos = word_start + strlen(completions.cvec[0]);
                     
                     // redraw the line properly
-                    std::cout << "\r\033[K" << prompt << input << std::flush;
+                    std::cout << "\r\033[K" << prompt_end << input << std::flush;
                 } else if (completions.len > 1) {
                     // multiple completions, show them
                     std::cout << '\n';
@@ -172,7 +166,7 @@ char* linenoise(const char* prompt) {
                 FillConsoleOutputCharacterA(hConsoleOut, ' ', csbi.dwSize.X, start, &written);
                 SetConsoleCursorPosition(hConsoleOut, start);
                 
-                std::cout << prompt << input << std::flush;
+                std::cout << "\r\033[K" << prompt_end << input << std::flush;
             }
         }
         else if (keyCode == VK_DOWN) {
@@ -194,7 +188,7 @@ char* linenoise(const char* prompt) {
             FillConsoleOutputCharacterA(hConsoleOut, ' ', csbi.dwSize.X, start, &written);
             SetConsoleCursorPosition(hConsoleOut, start);
             
-            std::cout << prompt << input << std::flush;
+            std::cout << "\r\033[K" << prompt_end << input << std::flush;
         }
         else if (keyCode == VK_LEFT) {
             // move cursor left
