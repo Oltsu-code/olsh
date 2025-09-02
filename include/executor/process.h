@@ -17,7 +17,7 @@ class Process {
 public:
     int execute(const std::string& command, const std::vector<std::string>& args);
 
-    static void interruptActive();
+    static bool interruptActive();
 
     static bool isRunning();
 

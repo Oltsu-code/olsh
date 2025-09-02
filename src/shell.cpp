@@ -61,28 +61,28 @@ Shell::~Shell() = default;
 
 void Shell::run() {
     // show welcome message from config
-    std::string welcomeMessage = configManager->getSetting("welcome_message", 
+    std::string welcomeMessage = configManager->getSetting("welcome_message",
         "OlShell v2.0 - Best shell ever made yk. Pls delete bash, zsh and every other shell u have on ur computer to use this.");
     std::cout << welcomeMessage << "\n";
-    
+
     while (running) {
         std::string promptStr = getPromptString();
         std::string input = inputManager->readLine(promptStr);
-        
-        // check for interrupt
-        if (s_interrupted.exchange(false, std::memory_order_acq_rel)) {
-            std::cout << std::endl;
+
+        // check for interrupt - if we were interrupted during input, just continue
+        if (s_interrupted.load(std::memory_order_acquire)) {
+            s_interrupted.store(false, std::memory_order_release);
             continue;
         }
-        
+
         // empty input
         if (input.empty()) {
             continue;
         }
-        
+
         // add to history
         historyManager->addCommand(input);
-        
+
         // process the command
         (void)processCommand(input);
     }
@@ -94,7 +94,7 @@ void Shell::notifyInterrupted() {
 
 std::string Shell::getPromptString() {
     std::string promptTemplate = configManager->getPrompt();
-    
+
     // check if using the default fancy prompt
     if (promptTemplate.find("┌─({user}@{hostname})-[{cwd}]") != std::string::npos) {
         // use the original colored fancy prompt
@@ -206,7 +206,7 @@ int Shell::processCommand(const std::string& input) {
     if (!(iss >> firstWord)) {
         return 0; // empty input
     }
-    
+
     if (scriptInterpreter->isScriptFile(firstWord)) {
         std::vector<std::string> args;
         std::string arg;
@@ -236,7 +236,6 @@ int Shell::processCommand(const std::string& input) {
     // execute command
     return executor->execute(std::move(command));
 }
-
 void Shell::exit() {
     std::cout << BLUE << "bye...\n"
               << BLUE << "hope ill see you again soon :(\n";

@@ -12,7 +12,6 @@ std::string WindowsCompat::normalizePath(const std::string& path) {
     // replace the / with \ cz windows is ass
     std::replace(normalized.begin(), normalized.end(), '/', '\\');
 #else
-    // Replace backslashes with forward slashes on Unix-like systems
     std::replace(normalized.begin(), normalized.end(), '\\', '/');
 #endif
 
