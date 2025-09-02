@@ -89,6 +89,10 @@ std::vector<Token> Tokenizer::tokenize() {
                 tokens.emplace_back(TokenType::SEMICOLON, ";");
                 advance();
                 break;
+            case '^':
+                tokens.emplace_back(TokenType::CARET, "^");
+                advance();
+                break;
             case '"':
             case '\'':
                 tokens.emplace_back(TokenType::WORD, readQuotedString(ch));

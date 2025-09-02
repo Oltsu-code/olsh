@@ -14,7 +14,9 @@ enum class TokenType {
     REDIRECT_APPEND,
     SEMICOLON,
     END_OF_INPUT,
-    AMPERSAND
+    AMPERSAND,
+    SKIP_BUILTIN,
+    CARET          // skips builtins. idk if i should rename this to like SKIP_BUILTINS but whatever
 };
 
 struct Token {

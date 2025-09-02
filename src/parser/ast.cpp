@@ -1,19 +1,20 @@
 #include "../../include/parser/ast.h"
 #include "../../include/builtins/builtin_registry.h"
 
+#include <iostream> //! debug remember to delete
+
 namespace olsh::Parser {
 
-Command::Command(const std::string& cmdName, const std::vector<std::string>& arguments)
-    : name(cmdName), args(arguments) {}
+Command::Command(const std::string& cmdName, const std::vector<std::string>& arguments, bool skipBuiltin)
+    : name(cmdName), args(arguments), skipBuiltinLookup(skipBuiltin) {}
 
 CommandType Command::getType() const {
-    // TODO: add some way to skip builtins (execute externals with the same name)
-
-
-    // builtin
-    if (getBuiltinRegistry().isBuiltin(name)) {
+    // builtin (skip if ^ is used)
+    if (!skipBuiltinLookup && getBuiltinRegistry().isBuiltin(name)) {
         return CommandType::BUILTIN;
     }
+
+    std::cout << "yo gang bangys we skipped the builtin wohoooo";
 
     // external
     return CommandType::EXTERNAL;

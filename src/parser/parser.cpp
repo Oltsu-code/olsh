@@ -28,6 +28,8 @@ bool CommandParser::match(Parser::TokenType type) {
 }
 
 std::unique_ptr<Parser::Command> CommandParser::parseCommand() {
+    bool skipBuiltin = match(Parser::TokenType::CARET);
+
     if (peek().type != Parser::TokenType::WORD) {
         return nullptr;
     }
@@ -41,7 +43,7 @@ std::unique_ptr<Parser::Command> CommandParser::parseCommand() {
         advance();
     }
 
-    return std::make_unique<Parser::Command>(name, args);
+    return std::make_unique<Parser::Command>(name, args, skipBuiltin);
 }
 
 std::unique_ptr<Parser::Pipeline> CommandParser::parsePipeline() {
@@ -73,8 +75,6 @@ std::unique_ptr<Parser::Pipeline> CommandParser::parsePipeline() {
         }
     }
 
-
-
     if (commands.size() == 1) {
         // return directly
         return nullptr;
@@ -102,6 +102,7 @@ std::unique_ptr<Parser::ASTNode> CommandParser::parseRedirection(std::unique_ptr
 
         node = std::make_unique<Parser::Redirection>(std::move(node), filename, append, input);
     }
+
 
     return node;
 }

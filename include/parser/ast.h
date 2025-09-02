@@ -24,8 +24,9 @@ class Command : public ASTNode {
 public:
     std::string name;
     std::vector<std::string> args;
+    bool skipBuiltinLookup;
 
-    Command(const std::string& cmdName, const std::vector<std::string>& arguments = {});
+    Command(const std::string& cmdName, const std::vector<std::string>& arguments, bool skipBuiltin = {});
     CommandType getType() const override;
 };
 

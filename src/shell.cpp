@@ -1,6 +1,3 @@
-// shell.cpp - the brain of olshell, now with 100% less insanity
-// completely rewritten to use the smart input system
-
 #include "../include/shell.h"
 #include "../include/utils/fs.h"
 #include "../include/builtins/config.h"
