@@ -17,6 +17,7 @@ Like every other shell, even this one has builtins.
 | `echo [-n] <text>`                               | Print text to the console. You can also use `-n` to skip creating a new line                                                                                                                                              |
 | `rm [-r] [-f] <path (or dir)>`                   | Remove a path or dir with `-r`. To skip all protections, use `-f` to force delete                                                                                                                                         |
 | `config [-s] [-g <key>] [-S <key> <value>] [-h]` | Show current config with `-s`. Get a specific value from the config with `-g <key>`. Set a value with `-S <key> <value>`                                                                                                  |
+| `mkdir <path>`                                   | Create a directory to `path`                                                                                                                                                                                              |
 
 ## Notes
 - All the flags can be combined, e.g. `ls -la` or `rm -rf`
