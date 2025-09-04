@@ -12,7 +12,7 @@ The world's worst shell.
 
 ## Contributing
 
-Contributions are welcome! Just do your thing.
+Please follow [these instructions](CONTRIBUTING.md) for contributing.
 
 ## License
 This project is licensed under the
