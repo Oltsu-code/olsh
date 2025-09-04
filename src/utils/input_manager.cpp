@@ -3,6 +3,13 @@
 #include <iostream>
 #include <filesystem>
 
+#ifdef _WIN32
+#include <windows.h>
+#include <io.h>
+#else
+#include <unistd.h>
+#endif
+
 namespace olsh::Utils {
 
     std::unique_ptr<InputManager> InputManager::instance = nullptr;
@@ -26,17 +33,41 @@ void InputManager::setShellInstance(olsh::Shell* shell) {
 }
 
 std::string InputManager::readLine(const std::string& prompt) {
-    char* line = linenoise(prompt.c_str());
+    bool isInteractive = true;
     
-    if (!line) {
-        // null return indicates EOF (Ctrl+D) - return special marker
-        return "\x04"; // ASCII EOT (End of Transmission)
+#ifdef _WIN32
+    DWORD mode;
+    HANDLE hInput = GetStdHandle(STD_INPUT_HANDLE);
+    if (!GetConsoleMode(hInput, &mode)) {
+        isInteractive = false; // not a console
     }
-    
-    std::string result(line);
-    linenoiseFree(line); // clean memory
-    
-    return result;
+#else
+    if (!isatty(STDIN_FILENO)) {
+        isInteractive = false;
+    }
+#endif
+
+    if (!isInteractive) {
+        std::cout << prompt << std::flush;
+        std::string line;
+        if (std::getline(std::cin, line)) {
+            return line;
+        } else {
+            return "\x04";
+        }
+    } else {
+        char* line = linenoise(prompt.c_str());
+        
+        if (!line) {
+            // null return indicates EOF (Ctrl+D) - return special marker
+            return "\x04"; // ASCII EOT (End of Transmission)
+        }
+        
+        std::string result(line);
+        linenoiseFree(line); // clean memory
+        
+        return result;
+    }
 }
 
 void InputManager::addToHistory(const std::string& line) {
