@@ -184,5 +184,5 @@ bool Config::configExists() const {
     return std::filesystem::exists(configFilePath);
 }
 
-} 
+} // namespace olsh::Utils
 

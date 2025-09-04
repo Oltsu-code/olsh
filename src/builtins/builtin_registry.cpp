@@ -60,4 +60,4 @@ BuiltinRegistry& getBuiltinRegistry() {
     return instance;
 }
 
-}
+} // namespace olsh

@@ -199,4 +199,4 @@ std::vector<std::string> Autocomplete::complete(const std::string& input, size_t
     }
 }
 
-}
+} // namespace olsh::Utils

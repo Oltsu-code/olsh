@@ -44,6 +44,6 @@ public:
     std::vector<Token> tokenize();
 };
 
-}
+} // namespace olsh::Parser
 
 #endif //TOKENIZER_H

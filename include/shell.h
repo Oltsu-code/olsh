@@ -58,16 +58,11 @@ public:
     void exit();
     int processCommand(const std::string& input);
 
-    // Autocomplete interface for input manager
     std::vector<std::string> autocomplete(const std::string& input, size_t cursorPos);
-
-    // Configuration access methods
     Utils::Config* getConfigManager() const { return configManager.get(); }
-
-    // Called by platform-specific signal handlers to record an interrupt event
     static void notifyInterrupted();
 };
 
-}
+} // namespace olsh
 
 #endif //SHELL_H

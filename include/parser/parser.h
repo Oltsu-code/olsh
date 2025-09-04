@@ -25,6 +25,6 @@ public:
     std::unique_ptr<Parser::ASTNode> parse(const std::string& input);
 };
 
-}
+} // namespace olsh
 
 #endif //PARSER_H

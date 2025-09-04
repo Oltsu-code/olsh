@@ -116,4 +116,4 @@ std::vector<Token> Tokenizer::tokenize() {
     return tokens;
 }
 
-}
+} // namespace olsh::Parser

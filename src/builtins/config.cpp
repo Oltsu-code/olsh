@@ -184,4 +184,4 @@ int Config::getConfig(const std::string& key) {
     return 0;
 }
 
-}
+} // namespace olsh::Builtins

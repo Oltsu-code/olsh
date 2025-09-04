@@ -56,6 +56,6 @@ public:
                              const std::vector<std::string>& args);
 };
 
-}
+} // namespace olsh::Utils
 
 #endif //SCRIPT_H

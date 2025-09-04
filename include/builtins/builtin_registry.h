@@ -24,7 +24,7 @@ namespace olsh {
 
     extern BuiltinRegistry& getBuiltinRegistry();
 
-}
+} // namespace olsh
 
 
 

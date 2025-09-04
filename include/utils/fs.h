@@ -21,6 +21,6 @@ public:
     static bool removeDirectory(const std::string& path, bool recursive = false);
 };
 
-}
+} // namespace olsh::Utils
 
 #endif //FS_H

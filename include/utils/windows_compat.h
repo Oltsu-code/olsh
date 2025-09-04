@@ -28,6 +28,6 @@ public:
     static std::string findExecutable(const std::string& command);
 };
 
-}
+} // namespace olsh::Utils
 
 #endif //WINDOWS_COMPAT_H

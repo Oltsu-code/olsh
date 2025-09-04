@@ -34,6 +34,6 @@ private:
 #endif
 };
 
-}
+} // namespace olsh
 
 #endif //PROCESS_H

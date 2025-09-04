@@ -4,30 +4,29 @@
 #include "linenoise.h"
 
 namespace olsh {
-    class Shell; // Forward declaration
-}
+    class Shell;
+} // namespace olsh
 
 namespace olsh::Utils {
 
-// Smart input handling using linenoise for professional terminal experience
 class InputManager {
 private:
     static std::unique_ptr<InputManager> instance;
-    static olsh::Shell* shell_instance; // For completion callbacks
+    static olsh::Shell* shell_instance;
     
 public:
-    InputManager(); // Made public for make_unique
+    InputManager();
     
     static InputManager& getInstance();
     static void setShellInstance(olsh::Shell* shell);
     
-    // Core input functions - clean interface over linenoise
+    // core input functions
     std::string readLine(const std::string& prompt);
     
-    // Tab completion bridge between linenoise and shell
+    // tab compleation
     static void completionCallback(const char* input, linenoiseCompletions* completions);
     
-    // History management
+    // history management
     void addToHistory(const std::string& line);
     bool saveHistory(const std::string& filename);
     bool loadHistory(const std::string& filename);
@@ -35,4 +34,4 @@ public:
     ~InputManager();
 };
 
-}
+} // namespace olsh::Utils

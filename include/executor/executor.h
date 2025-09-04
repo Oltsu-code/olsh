@@ -18,6 +18,6 @@ public:
     int execute(std::unique_ptr<Parser::ASTNode> node);
 };
 
-}
+} // namespace olsh
 
 #endif //EXECUTOR_H

@@ -24,6 +24,6 @@ public:
     std::vector<std::string> completeFile(const std::string& prefix);
 };
 
-}
+} // namespace olsh::Utils
 
 #endif //AUTOCOMPLETE_H

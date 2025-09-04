@@ -16,6 +16,6 @@ public:
     static bool endsWith(const std::string& str, const std::string& suffix);
 };
 
-}
+} // namespace olsh::Utils
 
 #endif //STRING_H

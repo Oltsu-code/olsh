@@ -103,4 +103,4 @@ bool Fs::removeDirectory(const std::string& path, bool recursive) {
     }
 }
 
-}
+} // namespace olsh::Utils

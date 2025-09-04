@@ -33,4 +33,4 @@ int Cat::execute(const std::vector<std::string>& args) {
     return 0;
 }
 
-}
+} // namespace olsh::Builtins

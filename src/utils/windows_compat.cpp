@@ -85,4 +85,4 @@ std::string WindowsCompat::findExecutable(const std::string& command) {
     return command;
 }
 
-}
+} // namespace olsh::Utils

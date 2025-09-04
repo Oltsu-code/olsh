@@ -24,6 +24,6 @@ public:
     void removeAlias(const std::string& name);
 };
 
-}
+} // namespace olsh::Builtins
 
 #endif //ALIAS_H

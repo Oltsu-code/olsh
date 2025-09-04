@@ -31,4 +31,4 @@ CommandType Redirection::getType() const {
     return CommandType::REDIRECTION;
 }
 
-}
+} // namespace olsh::Parser

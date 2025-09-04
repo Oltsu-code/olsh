@@ -243,4 +243,4 @@ void Alias::removeAlias(const std::string& name) {
     saveAliases();
 }
 
-}
+} // namespace olsh::Builtins

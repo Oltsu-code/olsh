@@ -90,4 +90,4 @@ int Rm::execute(const std::vector<std::string>& args) {
     return result;
 }
 
-}
+} // namespace olsh::Builtins

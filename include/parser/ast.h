@@ -49,6 +49,6 @@ public:
     CommandType getType() const override;
 };
 
-}
+} // namespace olsh::Parser
 
 #endif //AST_H

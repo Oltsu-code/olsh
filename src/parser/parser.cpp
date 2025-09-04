@@ -131,4 +131,4 @@ std::unique_ptr<Parser::ASTNode> CommandParser::parse(const std::string& input) 
     return nullptr;
 }
 
-}
+} // namespace olsh

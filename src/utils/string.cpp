@@ -49,4 +49,4 @@ bool String::endsWith(const std::string& str, const std::string& suffix) {
            str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
 }
 
-}
+}// namespace olsh::Utils

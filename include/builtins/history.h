@@ -28,6 +28,6 @@ public:
     bool loadFromFile(const std::string& filename);
 };
 
-}
+} // namespace olsh::Builtins
 
 #endif //HISTORY_H
