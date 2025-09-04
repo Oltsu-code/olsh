@@ -34,4 +34,5 @@ add_executable(olshell
         src/utils/linenoise.cpp
         src/utils/input_manager.cpp
         src/builtins/builtin_registry.cpp
+        src/builtins/mkdir.cpp
 )
