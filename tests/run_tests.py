@@ -18,6 +18,7 @@ try:
     from test_input_handling import *
     from test_performance import *
     from test_edge_cases import *
+    from test_all_features import *
 except ImportError as e:
     print(f"Warning: Could not import all test modules: {e}")
     print("Some tests may not be available.")
@@ -33,7 +34,8 @@ def create_test_suite():
         'test_comprehensive',
         'test_input_handling', 
         'test_performance',
-        'test_edge_cases'
+        'test_edge_cases',
+        'test_all_features'
     ]
     
     for module_name in test_modules:
@@ -66,9 +68,12 @@ def run_specific_test_category(category):
     elif category == "edge":
         import test_edge_cases
         suite = loader.loadTestsFromModule(test_edge_cases)
+    elif category == "features":
+        import test_all_features
+        suite = loader.loadTestsFromModule(test_all_features)
     else:
         print(f"Unknown test category: {category}")
-        print("Available categories: comprehensive, input, performance, edge")
+        print("Available categories: comprehensive, input, performance, edge, features")
         return
     
     runner = unittest.TextTestRunner(verbosity=2)
