@@ -52,7 +52,7 @@ void History::loadHistory() {
 
 void History::saveHistory() {
     std::filesystem::path path(historyFile);
-    std::filesystem::create_directory(path.parent_path()); // generate the dir if it doesnt exist
+    std::filesystem::create_directory(path.parent_path()); // create directory if it doesn't exist
 
     std::ofstream file(historyFile);
     if (!file.is_open()) {
@@ -76,7 +76,7 @@ void History::addCommand(const std::string& command) {
 
     historyList.push_back(command);
 
-    // trim history if it too long
+    // trim history if it's too long
     if (historyList.size() > maxHistorySize * 1.5) {
         historyList.erase(historyList.begin(), historyList.begin() + (historyList.size() - maxHistorySize));
     }
@@ -94,7 +94,7 @@ int History::execute(const std::vector<std::string>& args) {
     }
 
     if (args[0] == "-c") {
-        // clear history (yk when to use this)
+        // clear history command
         historyList.clear();
         saveHistory();
         std::cout << GREEN << "History cleared." << RESET << std::endl;
@@ -136,4 +136,36 @@ size_t History::size() const {
     return historyList.size();
 }
 
+bool History::saveToFile(const std::string& filename) {
+    std::filesystem::path path(filename);
+    std::filesystem::create_directories(path.parent_path());
+
+    std::ofstream file(filename);
+    if (!file.is_open()) {
+        return false;
+    }
+
+    size_t start = historyList.size() > maxHistorySize ? historyList.size() - maxHistorySize : 0;
+    for (size_t i = start; i < historyList.size(); i++) {
+        file << historyList[i] << std::endl;
+    }
+    return true;
 }
+
+bool History::loadFromFile(const std::string& filename) {
+    std::ifstream file(filename);
+    if (!file.is_open()) {
+        return false;
+    }
+
+    historyList.clear();
+    std::string line;
+    while (std::getline(file, line)) {
+        if (!line.empty()) {
+            historyList.push_back(line);
+        }
+    }
+    return true;
+}
+
+} // namespace olsh::Builtins

@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <signal.h>
+#include <errno.h>
 #endif
 
 namespace olsh {
@@ -35,7 +36,8 @@ int Process::execute(const std::string& command, const std::vector<std::string>&
     std::vector<char> mutableCmd(cmdLine.begin(), cmdLine.end());
     mutableCmd.push_back('\0');
 
-    DWORD creationFlags = CREATE_NEW_PROCESS_GROUP;
+    // don't create new process group - let child inherit console
+    DWORD creationFlags = 0;
 
     if (!CreateProcessA(
             /*lpApplicationName*/ nullptr,
@@ -133,32 +135,28 @@ int Process::execute(const std::string& command, const std::vector<std::string>&
 
 bool Process::interruptActive() {
     if (!s_running.load(std::memory_order_acquire)) return false;
+    
 #ifdef _WIN32
     if (s_processHandle && s_processId != 0) {
-        if (!GenerateConsoleCtrlEvent(CTRL_C_EVENT, s_processId)) {
-            TerminateProcess(s_processHandle, 130); // Standard Ctrl+C exit code
-        }
-        if (WaitForSingleObject(s_processHandle, 100) != WAIT_OBJECT_0) {
-            TerminateProcess(s_processHandle, 130);
-        }
+        // send ctrl+c event to the process
+        GenerateConsoleCtrlEvent(CTRL_C_EVENT, s_processId);
         s_running.store(false, std::memory_order_release);
         return true;
     }
 #else
     if (s_childPgid > 0) {
-        // First try SIGINT (Ctrl+C equivalent)
+        // send SIGINT to the process group
         kill(-s_childPgid, SIGINT);
-        // Immediately follow with SIGKILL for instant termination
-        kill(-s_childPgid, SIGKILL);
         s_running.store(false, std::memory_order_release);
         return true;
     } else if (s_childPid > 0) {
         kill(s_childPid, SIGINT);
-        kill(s_childPid, SIGKILL);
         s_running.store(false, std::memory_order_release);
         return true;
     }
 #endif
+    
+    s_running.store(false, std::memory_order_release);
     return false;
 }
 
@@ -175,4 +173,4 @@ std::string Process::buildCommandLine(const std::string& command, const std::vec
     return cmdLine;
 }
 
-}
+} // namespace olsh

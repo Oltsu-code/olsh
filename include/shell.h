@@ -4,6 +4,11 @@
 #include <string>
 #include <memory>
 #include <atomic>
+
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 #include "parser/parser.h"
 #include "executor/executor.h"
 #include "utils/autocomplete.h"
@@ -35,6 +40,16 @@ private:
     std::string expandPromptVariables(const std::string& promptTemplate);
 
     static std::atomic<bool> s_interrupted;
+
+    // signal handling
+    static void setupSignalHandlers();
+    static void cleanupSignalHandlers();
+    
+#ifdef _WIN32
+    static BOOL WINAPI signalHandler(DWORD dwCtrlType);
+#else
+    static void signalHandler(int signal);
+#endif
 
 public:
     Shell();

@@ -22,6 +22,10 @@ public:
     std::vector<std::string> getHistory() const;
     std::string getCommand(size_t index) const;
     size_t size() const;
+    
+    // public file operations for shell integration
+    bool saveToFile(const std::string& filename);
+    bool loadFromFile(const std::string& filename);
 };
 
 }

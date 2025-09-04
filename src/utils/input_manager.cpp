@@ -10,7 +10,7 @@ olsh::Shell* InputManager::shell_instance = nullptr;
 
 InputManager::InputManager() {
     linenoiseSetCompletionCallback(completionCallback);
-    linenoiseHistorySetMaxLen(1000); //? prob too much
+    linenoiseHistorySetMaxLen(1000); // should be plenty for most users
     linenoiseSetMultiLine(0);
 }
 
@@ -29,7 +29,8 @@ std::string InputManager::readLine(const std::string& prompt) {
     char* line = linenoise(prompt.c_str());
     
     if (!line) {
-        return "";
+        // null return indicates EOF (Ctrl+D) - return special marker
+        return "\x04"; // ASCII EOT (End of Transmission)
     }
     
     std::string result(line);
@@ -78,4 +79,4 @@ InputManager::~InputManager() {
     
 }
 
-}
+} // namespace olsh::Utils

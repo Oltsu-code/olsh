@@ -2,6 +2,7 @@
 #include "../include/utils/fs.h"
 #include "../include/builtins/config.h"
 #include "../include/utils/linenoise.h"
+#include "../include/executor/process.h"
 #include <utils/colors.h>
 #include <iostream>
 #include <filesystem>
@@ -19,10 +20,58 @@
 
 namespace olsh {
 
-// static interrupt flag - because ctrl+c should just work
+// static interrupt flag for proper ctrl+c handling
 std::atomic<bool> Shell::s_interrupted{false};
 
+#ifdef _WIN32
+BOOL WINAPI Shell::signalHandler(DWORD dwCtrlType) {
+    if (dwCtrlType == CTRL_C_EVENT) {
+        // if there's a running process, send signal to it and handle gracefully
+        if (Process::isRunning()) {
+            Process::interruptActive(); // this will mark process as not running
+            return TRUE; // prevent shell from exiting
+        } else {
+            // no process running, notify shell for prompt handling
+            Shell::notifyInterrupted();
+            return TRUE; // we handled it
+        }
+    }
+    return FALSE;
+}
+#else
+void Shell::signalHandler(int signal) {
+    if (signal == SIGINT) {
+        // if there's a running process, try to interrupt it
+        if (Process::isRunning()) {
+            Process::interruptActive();
+        } else {
+            // no process running, notify shell
+            Shell::notifyInterrupted();
+        }
+    }
+}
+#endif
+
+void Shell::setupSignalHandlers() {
+#ifdef _WIN32
+    SetConsoleCtrlHandler(signalHandler, TRUE);
+#else
+    signal(SIGINT, signalHandler);
+#endif
+}
+
+void Shell::cleanupSignalHandlers() {
+#ifdef _WIN32
+    SetConsoleCtrlHandler(NULL, FALSE);
+#else
+    signal(SIGINT, SIG_DFL);
+#endif
+}
+
 Shell::Shell() : running(true) {
+    // setup signal handlers first
+    setupSignalHandlers();
+    
     // init
     parser = std::make_unique<CommandParser>();
     executor = std::make_unique<Executor>();
@@ -32,7 +81,7 @@ Shell::Shell() : running(true) {
     configManager = std::make_unique<Utils::Config>();
     autocompleteManager = std::make_unique<Utils::Autocomplete>();
     
-    // give autocompleate aliases
+    // give autocomplete access to aliases
     auto aliases = aliasManager->getAliases();
     std::set<std::string> aliasNames;
     for (const auto& pair : aliases) {
@@ -40,7 +89,7 @@ Shell::Shell() : running(true) {
     }
     autocompleteManager->updateAliases(aliasNames);
     
-    // init inputmanager
+    // initialize input manager
     inputManager = std::make_unique<Utils::InputManager>();
     Utils::InputManager::setShellInstance(this);
 
@@ -57,25 +106,39 @@ Shell::Shell() : running(true) {
     currentDirectory = std::filesystem::current_path().string();
 }
 
-Shell::~Shell() = default;
+Shell::~Shell() {
+    // save history on exit
+    std::string historyFile = configManager->getSetting("config_dir", "") + "/.olshell/history";
+    inputManager->saveHistory(historyFile);
+    
+    // cleanup signal handlers
+    cleanupSignalHandlers();
+}
 
 void Shell::run() {
     // show welcome message from config
     std::string welcomeMessage = configManager->getSetting("welcome_message",
-        "OlShell v2.0 - Best shell ever made yk. Pls delete bash, zsh and every other shell u have on ur computer to use this.");
+        "OlShell - Type 'help' for available commands.");
     std::cout << welcomeMessage << "\n";
 
     while (running) {
+        // check for pending interrupt before showing prompt
+        if (s_interrupted.load(std::memory_order_acquire)) {
+            s_interrupted.store(false, std::memory_order_release);
+            std::cout << std::endl;
+        }
+
         std::string promptStr = getPromptString();
         std::string input = inputManager->readLine(promptStr);
 
-        // check for interrupt - if we were interrupted during input, just continue
-        if (s_interrupted.load(std::memory_order_acquire)) {
-            s_interrupted.store(false, std::memory_order_release);
-            continue;
+        // check for EOF (Ctrl+D)
+        if (input == "\x04") {
+            std::cout << "\nGoodbye!\n";
+            exit();
+            break;
         }
 
-        // empty input
+        // empty input (including from Ctrl+C)
         if (input.empty()) {
             continue;
         }
@@ -237,9 +300,7 @@ int Shell::processCommand(const std::string& input) {
     return executor->execute(std::move(command));
 }
 void Shell::exit() {
-    std::cout << BLUE << "bye...\n"
-              << BLUE << "hope ill see you again soon :(\n";
-    std::cout << RESET;
+    std::cout << BLUE << "Goodbye!\n" << RESET;
     running = false;
 }
 
@@ -251,4 +312,4 @@ std::vector<std::string> Shell::autocomplete(const std::string& input, size_t cu
     return {};
 }
 
-}
+} // namespace olsh
