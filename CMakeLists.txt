@@ -36,4 +36,5 @@ add_executable(olshell
         src/builtins/builtin_registry.cpp
         src/builtins/mkdir.cpp
         src/builtins/cp.cpp
+        src/builtins/touch.cpp
 )

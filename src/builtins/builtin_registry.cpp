@@ -11,6 +11,7 @@
 #include "../../include/builtins/config.h"
 #include "../../include/builtins/mkdir.h"
 #include "../../include/builtins/cp.h"
+#include "../../include/builtins/touch.h"
 
 namespace olsh {
 
@@ -31,6 +32,7 @@ void BuiltinRegistry::registerCommands() {
     Builtins::Config configCommand;
     Builtins::Mkdir mkdirCommand;
     Builtins::Cp cpCommand;
+    Builtins::Touch touchCommand;
 
     commands["cd"] = [cdCommand](const std::vector<std::string>& args) mutable { return cdCommand.execute(args); };
     commands["ls"] = [lsCommand](const std::vector<std::string>& args) mutable { return lsCommand.execute(args); };
@@ -44,6 +46,7 @@ void BuiltinRegistry::registerCommands() {
     commands["config"] = [configCommand](const std::vector<std::string>& args) mutable { return configCommand.execute(args); };
     commands["mkdir"] = [mkdirCommand](const std::vector<std::string>& args) mutable { return mkdirCommand.execute(args); };
     commands["cp"] = [cpCommand](const std::vector<std::string>& args) mutable { return cpCommand.execute(args); };
+    commands["touch"] = [touchCommand](const std::vector<std::string>& args) mutable { return touchCommand.execute(args); };
 }
 
 bool BuiltinRegistry::isBuiltin(const std::string& command) const {
