@@ -10,7 +10,7 @@ namespace olsh::Utils {
 class Config {
 private:
     std::unordered_map<std::string, std::string> settings;
-    std::filesystem::path configFilePath;
+    std::filesystem::path configFile;
     
     void createDefaultConfig();
     void ensureConfigDirectoryExists();

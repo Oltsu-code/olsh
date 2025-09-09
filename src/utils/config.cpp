@@ -14,8 +14,22 @@
 namespace olsh::Utils {
 
 Config::Config() {
-    std::string configDir = getConfigDirectory();
-    configFilePath = std::filesystem::path(configDir) / ".olshell" / "config.yaml";
+    // get home to store config
+#ifdef _WIN32
+    char* homeDir = getenv("USERPROFILE");
+    if (homeDir != nullptr) {
+        configFile = std::string(homeDir) + "\\.olshell\\config.yaml";
+    } else {
+        configFile = ".olsh_config.yaml";
+    }
+#else
+    char* homeDir = getenv("HOME");
+    if (homeDir != nullptr) {
+        aliasFile = std::string(homeDir) + "/.olshell/config.yaml";
+    } else {
+        aliasFile = ".olsh_config.yaml";
+    }
+#endif
     
     // default values
     settings["prompt"] = "┌─({user}@{hostname})-[{cwd}]\n└─$ ";
@@ -29,30 +43,8 @@ Config::Config() {
     }
 }
 
-std::string Config::getConfigDirectory() {
-#ifdef _WIN32
-    char path[MAX_PATH];
-    if (SUCCEEDED(SHGetFolderPathA(NULL, CSIDL_PROFILE, NULL, 0, path))) {
-        return std::string(path);
-    }
-    return "C:\\";
-#else
-    const char* home = getenv("HOME");
-    if (home) {
-        return std::string(home);
-    }
-    
-    struct passwd* pw = getpwuid(getuid());
-    if (pw && pw->pw_dir) {
-        return std::string(pw->pw_dir);
-    }
-    
-    return "/";
-#endif
-}
-
 void Config::ensureConfigDirectoryExists() {
-    std::filesystem::path configDir = configFilePath.parent_path();
+    std::filesystem::path configDir = configFile.parent_path();
     if (!std::filesystem::exists(configDir)) {
         try {
             std::filesystem::create_directories(configDir);
@@ -71,11 +63,11 @@ void Config::createDefaultConfig() {
 }
 
 bool Config::loadConfig() {
-    if (!std::filesystem::exists(configFilePath)) {
+    if (!std::filesystem::exists(configFile)) {
         return false;
     }
     
-    std::ifstream file(configFilePath);
+    std::ifstream file(configFile);
     if (!file.is_open()) {
         return false;
     }
@@ -130,7 +122,7 @@ bool Config::loadConfig() {
 }
 
 bool Config::saveConfig() {
-    std::ofstream file(configFilePath);
+    std::ofstream file(configFile);
     if (!file.is_open()) {
         return false;
     }
@@ -181,7 +173,7 @@ void Config::setPrompt(const std::string& prompt) {
 }
 
 bool Config::configExists() const {
-    return std::filesystem::exists(configFilePath);
+    return std::filesystem::exists(configFile);
 }
 
 } // namespace olsh::Utils
