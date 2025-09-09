@@ -1,7 +1,7 @@
 #include "../include/shell.h"
 #include "../include/utils/fs.h"
 #include "../include/builtins/config.h"
-#include "../include/utils/linenoise.h"
+#include "../include/utils/readline.h"
 #include "../include/executor/process.h"
 #include <utils/colors.h>
 #include <iostream>
@@ -96,8 +96,8 @@ Shell::Shell() : running(true) {
     // set shell instance for config builtin
     Builtins::Config::setShellInstance(this);
 
-    // set history instance for linenoise
-    linenoiseSetHistoryInstance(historyManager.get());
+    // set history instance for readline
+    readlineSetHistoryInstance(historyManager.get());
 
     // load history
     std::string historyFile = configManager->getSetting("config_dir", "") + "/.olshell/history";

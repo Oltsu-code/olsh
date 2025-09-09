@@ -31,7 +31,7 @@ add_executable(olshell
         src/utils/autocomplete.cpp
         src/utils/script.cpp
         src/utils/config.cpp
-        src/utils/linenoise.cpp
+        src/utils/readline.cpp
         src/utils/input_manager.cpp
         src/builtins/builtin_registry.cpp
         src/builtins/mkdir.cpp

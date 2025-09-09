@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 #include <memory>
-#include "linenoise.h"
+#include "readline.h"
 
 namespace olsh {
     class Shell;
@@ -24,7 +24,7 @@ public:
     std::string readLine(const std::string& prompt);
     
     // tab compleation
-    static void completionCallback(const char* input, linenoiseCompletions* completions);
+    static void completionCallback(const char* input, readlineCompletions* completions);
     
     // history management
     void addToHistory(const std::string& line);

@@ -16,9 +16,9 @@ namespace olsh::Utils {
 olsh::Shell* InputManager::shell_instance = nullptr;
 
 InputManager::InputManager() {
-    linenoiseSetCompletionCallback(completionCallback);
-    linenoiseHistorySetMaxLen(1000); // should be plenty for most users
-    linenoiseSetMultiLine(0);
+    readlineSetCompletionCallback(completionCallback);
+    readlineHistorySetMaxLen(1000); // should be plenty for most users
+    readlineSetMultiLine(0);
 }
 
 InputManager& InputManager::getInstance() {
@@ -56,7 +56,7 @@ std::string InputManager::readLine(const std::string& prompt) {
             return "\x04";
         }
     } else {
-        char* line = linenoise(prompt.c_str());
+        char* line = readline(prompt.c_str());
         
         if (!line) {
             // null return indicates EOF (Ctrl+D) - return special marker
@@ -64,7 +64,7 @@ std::string InputManager::readLine(const std::string& prompt) {
         }
         
         std::string result(line);
-        linenoiseFree(line); // clean memory
+        readlineFree(line); // clean memory
         
         return result;
     }
@@ -72,7 +72,7 @@ std::string InputManager::readLine(const std::string& prompt) {
 
 void InputManager::addToHistory(const std::string& line) {
     if (!line.empty()) {
-        linenoiseHistoryAdd(line.c_str());
+        readlineHistoryAdd(line.c_str());
     }
 }
 
@@ -83,16 +83,16 @@ bool InputManager::saveHistory(const std::string& filename) {
     std::filesystem::path histPath(filename);
     std::filesystem::create_directories(histPath.parent_path());
     
-    return linenoiseHistorySave(filename.c_str()) == 0;
+    return readlineHistorySave(filename.c_str()) == 0;
 }
 
 bool InputManager::loadHistory(const std::string& filename) {
     if (filename.empty()) return false;
     
-    return linenoiseHistoryLoad(filename.c_str()) == 0;
+    return readlineHistoryLoad(filename.c_str()) == 0;
 }
 
-void InputManager::completionCallback(const char* input, linenoiseCompletions* completions) {
+void InputManager::completionCallback(const char* input, readlineCompletions* completions) {
     if (!shell_instance) {
         return; 
     }
@@ -100,9 +100,9 @@ void InputManager::completionCallback(const char* input, linenoiseCompletions* c
     std::string inputStr(input);
     auto suggestions = shell_instance->autocomplete(inputStr, inputStr.length());
 
-    // add each suggestion to linenoise
+    // add each suggestion to readline
     for (const auto& suggestion : suggestions) {
-        linenoiseAddCompletion(completions, suggestion.c_str());
+        readlineAddCompletion(completions, suggestion.c_str());
     }
 }
 

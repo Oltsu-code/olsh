@@ -1,4 +1,4 @@
-#include "utils/linenoise.h"
+#include "utils/readline.h"
 #include "builtins/history.h"
 #include <iostream>
 #include <string>
@@ -16,7 +16,7 @@
 #endif
 
 // global state because sometimes you gotta keep it simple
-static linenoiseCompletionCallback* completion_callback = nullptr;
+static readlineCompletionCallback* completion_callback = nullptr;
 static olsh::Builtins::History* history_instance = nullptr;
 static int history_index = -1;
 static int max_history = 100;
@@ -24,23 +24,23 @@ static int max_history = 100;
 extern "C" {
 
 // set the history instance to use
-void linenoiseSetHistoryInstance(olsh::Builtins::History* history) {
+void readlineSetHistoryInstance(olsh::Builtins::History* history) {
     history_instance = history;
 }
 
 // set the tab completion callback
-void linenoiseSetCompletionCallback(linenoiseCompletionCallback* fn) {
+void readlineSetCompletionCallback(readlineCompletionCallback* fn) {
     completion_callback = fn;
 }
 
 // add a completion option when tab is pressed
-void linenoiseAddCompletion(linenoiseCompletions* lc, const char* str) {
+void readlineAddCompletion(readlineCompletions* lc, const char* str) {
     lc->cvec = (char**)realloc(lc->cvec, sizeof(char*) * (lc->len + 1));
     lc->cvec[lc->len] = strdup(str);
     lc->len++;
 }
 
-char* linenoise(const char* prompt) {
+char* readline(const char* prompt) {
     const char* prompt_end =
         (prompt ? (strrchr(prompt, '\n') ? strrchr(prompt, '\n') + 1 : prompt) : "");
     std::cout << prompt << std::flush;
@@ -236,7 +236,7 @@ char* linenoise(const char* prompt) {
 
             // tab completion
             if (completion_callback) {
-                linenoiseCompletions completions = {0, nullptr};
+                readlineCompletions completions = {0, nullptr};
                 completion_callback(input.c_str(), &completions);
 
                 if (completions.len == 1) {
@@ -414,7 +414,7 @@ char* linenoise(const char* prompt) {
 }
 
 // add line to history
-int linenoiseHistoryAdd(const char* line) {
+int readlineHistoryAdd(const char* line) {
     if (!line || strlen(line) == 0 || !history_instance) return 0;
 
     history_instance->addCommand(std::string(line));
@@ -422,22 +422,26 @@ int linenoiseHistoryAdd(const char* line) {
     return 1;
 }
 
-int linenoiseHistorySetMaxLen(int len) {
+int readlineHistorySetMaxLen(int len) {
     max_history = len;
     return 1;
 }
 
-int linenoiseHistorySave(const char* filename) {
+int readlineHistorySave(const char* filename) {
     if (!filename || !history_instance) return -1;
     return history_instance->saveToFile(std::string(filename)) ? 0 : -1;
 }
 
-int linenoiseHistoryLoad(const char* filename) {
+int readlineHistoryLoad(const char* filename) {
     if (!filename || !history_instance) return -1;
     return history_instance->loadFromFile(std::string(filename)) ? 0 : -1;
 }
 
-void linenoiseClearScreen(void) {
+void readlineHistoryReset(void) {
+    history_index = -1;
+}
+
+void readlineClearScreen(void) {
 #ifdef _WIN32
     system("cls");
 #else
@@ -445,15 +449,15 @@ void linenoiseClearScreen(void) {
 #endif
 }
 
-// free a linenoise result
-void linenoiseFree(void* ptr) {
+// free a readline result
+void readlineFree(void* ptr) {
     free(ptr);
 }
 
 // *placeholder funcs for features not yet implemented
-void linenoiseSetHintsCallback(linenoiseHintsCallback* fn) {  }
-void linenoiseSetFreeHintsCallback(linenoiseFreeHintsCallback* fn) {  }
-void linenoiseSetMultiLine(int ml) {  }
-void linenoisePrintKeyCodes(void) {  }
+void readlineSetHintsCallback(readlineHintsCallback* fn) {  }
+void readlineSetFreeHintsCallback(readlineFreeHintsCallback* fn) {  }
+void readlineSetMultiLine(int ml) {  }
+void readlinePrintKeyCodes(void) {  }
 
 }

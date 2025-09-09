@@ -1,4 +1,5 @@
 #include "../../include/builtins/history.h"
+#include "../../include/utils/readline.h"
 #include <utils/colors.h>
 #include <iostream>
 #include <fstream>
@@ -97,7 +98,9 @@ int History::execute(const std::vector<std::string>& args) {
         // clear history command
         historyList.clear();
         saveHistory();
+        readlineHistoryReset(); // Reset the readline history navigation index
         std::cout << GREEN << "History cleared." << RESET << std::endl;
+        std::cout << historyList.size() << " commands in history." << std::endl;
         return 0;
     }
 
