@@ -21,6 +21,18 @@ static olsh::Builtins::History* history_instance = nullptr;
 static int history_index = -1;
 static int max_history = 100;
 
+// undo state tracking
+static std::string undo_buffer;
+static size_t undo_cursor_pos = 0;
+static bool undo_available = false;
+
+// helper function to save state for undo
+static void saveUndoState(const std::string& current_input, size_t current_cursor_pos) {
+    undo_buffer = current_input;
+    undo_cursor_pos = current_cursor_pos;
+    undo_available = true;
+}
+
 extern "C" {
 
 // set the history instance to use
@@ -65,6 +77,9 @@ char* readline(const char* prompt) {
     std::string input;
     size_t cursor_pos = 0;
     history_index = -1;
+    
+    // reset undo state for new line
+    undo_available = false;
 
     while (true) {
         DWORD numEvents = 0;
@@ -88,7 +103,7 @@ char* readline(const char* prompt) {
         char ch = inputRecord.Event.KeyEvent.uChar.AsciiChar;
         DWORD controlKeys = inputRecord.Event.KeyEvent.dwControlKeyState;
 
-        // Handle Ctrl key combinations
+        // ctrl key
         if (controlKeys & (LEFT_CTRL_PRESSED | RIGHT_CTRL_PRESSED)) {
             switch (keyCode) {
                 case 'C': // ctrl+c
@@ -97,6 +112,28 @@ char* readline(const char* prompt) {
                     cursor_pos = 0;
                     history_index = -1;
                     std::cout << prompt << std::flush;
+                    continue;
+                case 'Z': // ctrl+z (undo)
+                    if (undo_available) {
+                        // clear current line
+                        std::cout << "\r\033[K" << prompt_end;
+                        
+                        // restore from undo buffer
+                        input = undo_buffer;
+                        cursor_pos = undo_cursor_pos;
+                        
+                        // display restored line
+                        std::cout << input;
+                        
+                        // position cursor correctly
+                        if (cursor_pos < input.length()) {
+                            std::cout << std::string(input.length() - cursor_pos, '\b');
+                        }
+                        std::cout << std::flush;
+                        
+                        // clear undo (can only undo once)
+                        undo_available = false;
+                    }
                     continue;
                 case 'D': // ctrl+d (EOF)
                     if (input.empty()) {
@@ -107,6 +144,7 @@ char* readline(const char* prompt) {
                     } else {
                         // delete character under cursor
                         if (cursor_pos < input.length()) {
+                            saveUndoState(input, cursor_pos); // save state for undo
                             input.erase(cursor_pos, 1);
                             std::cout << "\033[K" << input.substr(cursor_pos) << std::flush;
                             if (cursor_pos < input.length()) {
@@ -132,18 +170,23 @@ char* readline(const char* prompt) {
                     continue;
                 case 'K': // ctrl+k (kill to end of line)
                     if (cursor_pos < input.length()) {
+                        saveUndoState(input, cursor_pos); // save state for undo
                         input.erase(cursor_pos);
                         std::cout << "\033[K" << std::flush; // clear to end of line
                     }
                     continue;
                 case 'U': // ctrl+u (kill entire line)
-                    std::cout << std::string(cursor_pos, '\b') << std::flush; // move to beginning
-                    input.clear();
-                    cursor_pos = 0;
-                    std::cout << "\033[K" << std::flush; // clear line
+                    if (!input.empty()) {
+                        saveUndoState(input, cursor_pos); // save state for undo
+                        std::cout << std::string(cursor_pos, '\b') << std::flush; // move to beginning
+                        input.clear();
+                        cursor_pos = 0;
+                        std::cout << "\033[K" << std::flush; // clear line
+                    }
                     continue;
                 case 'W': // ctrl+w (kill word backwards)
                     if (cursor_pos > 0) {
+                        saveUndoState(input, cursor_pos); // save state for undo
                         size_t word_start = cursor_pos;
                         // skip whitespace
                         while (word_start > 0 && input[word_start - 1] == ' ') {
@@ -226,6 +269,7 @@ char* readline(const char* prompt) {
         }
         else if (keyCode == VK_BACK) {
             if (cursor_pos > 0) {
+                saveUndoState(input, cursor_pos); // save state for undo
                 input.erase(cursor_pos - 1, 1);
                 cursor_pos--;
                 std::cout << "\b \b" << std::flush;
@@ -376,6 +420,7 @@ char* readline(const char* prompt) {
         else if (keyCode == VK_DELETE) {
             // delete character under cursor
             if (cursor_pos < input.length()) {
+                saveUndoState(input, cursor_pos); // save state for undo
                 input.erase(cursor_pos, 1);
                 std::cout << "\033[K" << input.substr(cursor_pos) << std::flush;
                 if (cursor_pos < input.length()) {
