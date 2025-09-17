@@ -7,9 +7,29 @@ The world's worst shell.
 - [Scripting](docs/Scripting.MD)
 - [Pipes and redirection](docs/Pipeline.MD)
 - History
-- Tab Completion (not working)
+- Tab Completion (kinda wokrs)
 - Aliases
 
+# Build & Setup
+
+1. **Clone the repo:**
+   ```bash
+   git clone https://github.com/Oltsu-code/olsh.git
+   cd olsh
+   ```
+
+2. **Build:**
+   ```bash
+    mkdir build && cd build
+    cmake ..
+    cmake --build .
+   ```
+   
+3. **Run:**
+   ```bash
+   ./olshell
+   ```
+   
 ## Contributing
 
 Please follow [these instructions](CONTRIBUTING.md) for contributing.
