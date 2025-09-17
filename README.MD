@@ -2,6 +2,8 @@
 
 The world's worst shell.
 
+I'm building olshell to be my daily driven shell, since I haven't yet found a decent shell for windows and just decided to make my own.
+
 ## Features
 - [Builtins](docs/Builtins.MD)
 - [Scripting](docs/Scripting.MD)
@@ -10,7 +12,7 @@ The world's worst shell.
 - Tab Completion (kinda wokrs)
 - Aliases
 
-# Build & Setup
+## Build & Setup
 
 1. **Clone the repo:**
    ```bash
@@ -29,7 +31,7 @@ The world's worst shell.
    ```bash
    ./olshell
    ```
-   
+
 ## Contributing
 
 Please follow [these instructions](CONTRIBUTING.md) for contributing.
