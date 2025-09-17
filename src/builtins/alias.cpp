@@ -129,6 +129,7 @@ int Alias::execute(const std::vector<std::string>& args) {
         if (it != aliases.end()) {
             aliases.erase(it);
             saveAliases();
+            loadAliases();
             std::cout << "Alias '" << nameToDelete << "' deleted." << std::endl;
             return 0;
         } else {
