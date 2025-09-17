@@ -18,10 +18,13 @@ Like every other shell, even this one has builtins.
 | `rm [-r] [-f] <path (or dir)>`                   | Remove a path or dir with `-r`. To skip all protections, use `-f` to force delete                                                                                                                                         |
 | `config [-s] [-g <key>] [-S <key> <value>] [-h]` | Show current config with `-s`. Get a specific value from the config with `-g <key>`. Set a value with `-S <key> <value>`                                                                                                  |
 | `mkdir <path>`                                   | Create a directory to `path`                                                                                                                                                                                              |
+| `touch <path>`                                   | Create a file to `path`                                                                                                                                                                                                   |
+| `cp <src> <dest>`                                | Copy a file from `src` to `dest`                                                                                                                                                                                          |
+| `mv <src> <dest>`                                | Move a file from `src` to `dest`                                                                                                                                                                                          |
 
 ## Notes
 - All the flags can be combined, e.g. `ls -la` or `rm -rf`
 - `cd` supports `..` and `.` for parent and current directory respectively
 - You can also use `~` to refer to your home directory (e.g. `cd ~/Documents` or `cat ~/file.txt`)
 - Most off the builtins also have long flags (e.g. `config --set`)
-- Builtins can also be skipped with `^` (e.g. `^cd`)
+- Builtins can also be skipped with `^` (e.g. `^cd`). This will execute external commands
