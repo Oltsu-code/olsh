@@ -3,10 +3,10 @@ project(olshell)
 
 set(CMAKE_CXX_STANDARD 26)
 
-# Tell CMake where to find headers
+# include dirs
 include_directories(include)
 
-# Only list .cpp files here
+# copilot told me only to list cpp files, but sometimes they slip in due to my ide adding them automatically
 add_executable(olshell
         src/main.cpp
         src/shell.cpp
@@ -38,5 +38,4 @@ add_executable(olshell
         src/builtins/cp.cpp
         src/builtins/touch.cpp
         src/builtins/mv.cpp
-        include/builtins/mv.h
 )
