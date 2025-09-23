@@ -115,7 +115,9 @@ Shell::~Shell() {
     cleanupSignalHandlers();
 }
 
-void Shell::run() {
+void Shell::run(int argc, char** argv) {
+    // TODO: add some kind of logic to parse flags and shit from the args.
+
     // show welcome message from config
     std::string welcomeMessage = configManager->getSetting("welcome_message",
         "OlShell - Type 'help' for available commands.");
@@ -130,18 +132,6 @@ void Shell::run() {
 
         std::string promptStr = getPromptString();
         std::string input = inputManager->readLine(promptStr);
-
-        // check for EOF (Ctrl+D)
-        if (input == "\x04") {
-            std::cout << "\nGoodbye!\n";
-            exit();
-            break;
-        }
-
-        // empty input (including from Ctrl+C)
-        if (input.empty()) {
-            continue;
-        }
 
         // add to history
         historyManager->addCommand(input);

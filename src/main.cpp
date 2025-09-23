@@ -34,6 +34,6 @@ int main(int argc, char** argv) {
         }
     }
 
-    shell.run();
+    shell.run(argc, argv);
     return 0;
 }

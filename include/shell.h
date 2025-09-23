@@ -54,7 +54,7 @@ private:
 public:
     Shell();
     ~Shell();
-    void run();
+    void run(int rgc, char** argv);
     void exit();
     int processCommand(const std::string& input);
 

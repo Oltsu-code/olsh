@@ -250,3 +250,4 @@ def test_new_feature(self):
     self.assertIn("expected output", stdout)
     self.assertTrue(self.file_exists("output.txt"))
 ```
+### btw all the tests are 100% written by AI
