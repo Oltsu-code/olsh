@@ -9,69 +9,10 @@
 #include <sstream>
 #include <vector>
 #include <cctype>
-#include <atomic>
-
-#ifdef _WIN32
-#include <windows.h>
-#else
-#include <unistd.h>
-#include <signal.h>
-#endif
 
 namespace olsh {
 
-// static interrupt flag for proper ctrl+c handling
-std::atomic<bool> Shell::s_interrupted{false};
-
-#ifdef _WIN32
-BOOL WINAPI Shell::signalHandler(DWORD dwCtrlType) {
-    if (dwCtrlType == CTRL_C_EVENT) {
-        // if there's a running process, send signal to it and handle gracefully
-        if (Process::isRunning()) {
-            Process::interruptActive(); // this will mark process as not running
-            return TRUE; // prevent shell from exiting
-        } else {
-            // no process running, notify shell for prompt handling
-            Shell::notifyInterrupted();
-            return TRUE; // we handled it
-        }
-    }
-    return FALSE;
-}
-#else
-void Shell::signalHandler(int signal) {
-    if (signal == SIGINT) {
-        // if there's a running process, try to interrupt it
-        if (Process::isRunning()) {
-            Process::interruptActive();
-        } else {
-            // no process running, notify shell
-            Shell::notifyInterrupted();
-        }
-    }
-}
-#endif
-
-void Shell::setupSignalHandlers() {
-#ifdef _WIN32
-    SetConsoleCtrlHandler(signalHandler, TRUE);
-#else
-    signal(SIGINT, signalHandler);
-#endif
-}
-
-void Shell::cleanupSignalHandlers() {
-#ifdef _WIN32
-    SetConsoleCtrlHandler(NULL, FALSE);
-#else
-    signal(SIGINT, SIG_DFL);
-#endif
-}
-
 Shell::Shell() : running(true) {
-    // setup signal handlers first
-    setupSignalHandlers();
-    
     // init
     parser = std::make_unique<CommandParser>();
     executor = std::make_unique<Executor>();
@@ -110,9 +51,6 @@ Shell::~Shell() {
     // save history on exit
     std::string historyFile = configManager->getSetting("config_dir", "") + "/.olshell/history";
     inputManager->saveHistory(historyFile);
-    
-    // cleanup signal handlers
-    cleanupSignalHandlers();
 }
 
 void Shell::run(int argc, char** argv) {
@@ -124,14 +62,13 @@ void Shell::run(int argc, char** argv) {
     std::cout << welcomeMessage << "\n";
 
     while (running) {
-        // check for pending interrupt before showing prompt
-        if (s_interrupted.load(std::memory_order_acquire)) {
-            s_interrupted.store(false, std::memory_order_release);
-            std::cout << std::endl;
-        }
-
         std::string promptStr = getPromptString();
         std::string input = inputManager->readLine(promptStr);
+
+        // skip empty input
+        if (input.empty()) {
+            continue;
+        }
 
         // add to history
         historyManager->addCommand(input);
@@ -139,10 +76,6 @@ void Shell::run(int argc, char** argv) {
         // process the command
         (void)processCommand(input);
     }
-}
-
-void Shell::notifyInterrupted() {
-    s_interrupted.store(true, std::memory_order_release);
 }
 
 std::string Shell::getPromptString() {
@@ -282,7 +215,7 @@ int Shell::processCommand(const std::string& input) {
 
     // validate command
     if (!command) {
-        std::cerr << "Failed to parse command: " << expandedInput << std::endl;
+        std::cerr << "olsh: failed to parse command: " << expandedInput << std::endl;
         return -1;
     }
 

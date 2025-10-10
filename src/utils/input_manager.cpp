@@ -53,14 +53,15 @@ std::string InputManager::readLine(const std::string& prompt) {
         if (std::getline(std::cin, line)) {
             return line;
         } else {
-            return "\x04";
+            return "exit";
         }
     } else {
         char* line = readline(prompt.c_str());
         
         if (!line) {
-            // null return indicates EOF (Ctrl+D) - return special marker
-            return "\x04"; // ASCII EOT (End of Transmission)
+            // null return indicates EOF (Ctrl+D) - return "exit" command
+            std::cout << "exit\n";
+            return "exit";
         }
         
         std::string result(line);

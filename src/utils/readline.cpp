@@ -107,12 +107,11 @@ char* readline(const char* prompt) {
         if (controlKeys & (LEFT_CTRL_PRESSED | RIGHT_CTRL_PRESSED)) {
             switch (keyCode) {
                 case 'C': // ctrl+c
-                    std::cout << "\033[31m^C\033[0m\n";
-                    input.clear();
-                    cursor_pos = 0;
-                    history_index = -1;
-                    std::cout << prompt << std::flush;
-                    continue;
+                    // Return empty string and let shell handle it
+                    std::cout << "^C\n" << std::flush;
+                    SetConsoleMode(hConsole, originalMode);
+                    SetConsoleMode(hConsoleOut, originalOutMode);
+                    return strdup(""); // return empty string, not nullptr
                 case 'Z': // ctrl+z (undo)
                     if (undo_available) {
                         // clear current line
