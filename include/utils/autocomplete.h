@@ -9,7 +9,7 @@ namespace olsh::Utils {
 
 class Autocomplete {
 private:
-    std::set<std::string> builtinCommands;
+    std::vector<std::string> builtinCommands;
     std::set<std::string> pathExecutables;
     std::set<std::string> aliases;
 

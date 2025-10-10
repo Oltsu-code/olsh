@@ -65,6 +65,14 @@ int BuiltinRegistry::execute(const std::string& command, const std::vector<std::
     return 1;
 }
 
+std::vector <std::string> BuiltinRegistry::getCommandNames() const {
+    std::vector<std::string> names;
+    for (const auto& pair : commands) {
+        names.push_back(pair.first);
+    }
+    return names;
+}
+
 BuiltinRegistry& getBuiltinRegistry() {
     static BuiltinRegistry instance;
     return instance;

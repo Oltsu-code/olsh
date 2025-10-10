@@ -1,10 +1,12 @@
 #include "../../include/utils/autocomplete.h"
 #include "../../include/utils/fs.h"
 #include "../../include/utils/windows_compat.h"
+#include "../../include/builtins/builtin_registry.h"
 #include <filesystem>
 #include <sstream>
 #include <algorithm>
 #include <iostream>
+
 
 #ifdef _WIN32
 #include <windows.h>
@@ -19,9 +21,7 @@ namespace olsh::Utils {
 
 Autocomplete::Autocomplete() {
     // builtins
-    builtinCommands = {
-        "cd", "ls", "pwd", "echo", "rm", "help", "clear", "cat", "alias", "history", "exit"
-    };
+    builtinCommands = getBuiltinRegistry().getCommandNames();
 
     loadPathExecutables();
 }
