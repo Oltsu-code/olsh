@@ -25,9 +25,9 @@ Config::Config() {
 #else
     char* homeDir = getenv("HOME");
     if (homeDir != nullptr) {
-        aliasFile = std::string(homeDir) + "/.olshell/config.yaml";
+        configFile = std::string(homeDir) + "/.olshell/config.yaml";
     } else {
-        aliasFile = ".olsh_config.yaml";
+        configFile = ".olsh_config.yaml";
     }
 #endif
     
