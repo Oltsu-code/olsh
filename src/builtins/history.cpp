@@ -25,6 +25,7 @@ History::History() : maxHistorySize(1000) {
     } else {
         historyFile = ".olsh_history";
     }
+
 #else
     char* homeDir = getenv("HOME");
     if (homeDir != nullptr) {
@@ -88,6 +89,13 @@ void History::addCommand(const std::string& command) {
 int History::execute(const std::vector<std::string>& args) {
     if (args.empty()) {
         // all history
+        loadFromFile(historyFile); // reload history from file
+
+        if (historyList.empty()) {
+            std::cout << GREEN << "No commands in history." << RESET << std::endl;
+            return 0;
+        }
+
         for (size_t i = 0; i < historyList.size(); i++) {
             std::cout << std::setw(5) << (i + 1) << "  " << historyList[i] << std::endl;
         }
@@ -97,7 +105,7 @@ int History::execute(const std::vector<std::string>& args) {
     if (args[0] == "-c") {
         // clear history command
         historyList.clear();
-        saveHistory();
+        std::filesystem::remove(historyFile); // delete history file
         readlineHistoryReset(); // Reset the readline history navigation index
         std::cout << GREEN << "History cleared." << RESET << std::endl;
         std::cout << historyList.size() << " commands in history." << std::endl;
